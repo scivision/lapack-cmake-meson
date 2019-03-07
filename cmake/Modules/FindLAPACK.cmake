@@ -29,6 +29,8 @@ COMPONENTS default to Netlib LAPACK / LapackE, otherwise:
   Intel MKL 32-bit integer with Intel OpenMP for ICC, GCC and PGCC
 ``IntelSeq``
   Intel MKL 32-bit integer without threading for ICC, GCC, and PGCC
+``LAPACKE``
+  Netlib LapackE for C / C++
 
 
 Result Variables
@@ -123,14 +125,21 @@ else()
     NAMES lapack
     HINTS ${LAPACK_LIBRARY_DIRS})
 
-  pkg_check_modules(LAPACKE lapacke)
-  find_library(LAPACKE_LIBRARY
-    NAMES lapacke
-    HINTS ${LAPACKE_LIBRARY_DIRS})
+  if(LAPACKE IN_LIST LAPACK_FIND_COMPONENTS)
+    pkg_check_modules(LAPACKE lapacke)
+    find_library(LAPACKE_LIBRARY
+      NAMES lapacke
+      HINTS ${LAPACKE_LIBRARY_DIRS})
 
-  find_path(LAPACK_INCLUDE_DIR
-    NAMES lapacke.h
-    HINTS ${LAPACKE_INCLUDE_DIRS})
+    find_path(LAPACK_INCLUDE_DIR
+      NAMES lapacke.h
+      HINTS ${LAPACKE_INCLUDE_DIRS})
+
+    set(LAPACK_LAPACKE_FOUND true)
+    set(LAPACK_LIBRARY ${LAPACKE_LIBRARY})
+  else()
+    unset(LAPACK_LIBRARY)
+  endif()
 
   pkg_check_modules(BLAS blas)
   find_library(BLAS_LIBRARY
@@ -138,12 +147,6 @@ else()
     HINTS ${BLAS_LIBRARY_DIRS})
 
   mark_as_advanced(BLAS_LIBRARY)
-
-  if(LAPACKE_LIBRARY)
-    set(LAPACK_LIBRARY ${LAPACKE_LIBRARY})
-  else()
-    unset(LAPACK_LIBRARY)
-  endif()
 
   list(APPEND LAPACK_LIBRARY ${LAPACK_LIB} ${BLAS_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 endif()

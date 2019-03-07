@@ -21,7 +21,7 @@ if(DEFINED ENV{MKLROOT})
   find_package(LAPACK COMPONENTS IntelPar REQUIRED)
   set(USEMKL 1)
 else()
-  find_package(LAPACK REQUIRED)  # netlib -- requires LapackE  apt install liblapacke-dev
+  find_package(LAPACK COMPONENTS LAPACKE REQUIRED)  # netlib -- apt install liblapacke-dev
   set(USEMKL 0)
 endif()
 
