@@ -1,0 +1,32 @@
+language: minimal
+group: travis_latest
+dist: xenial
+
+git:
+  depth: 25
+  quiet: true
+
+#env: FC=gfortran-6
+
+#addons:
+#  apt:
+#    sources: ubuntu-toolchain-r-test
+#    packages:
+#    - gfortran-6
+
+matrix:
+  include:
+  - os: linux
+  # - windows  # needs gfortran, straightforward to add but already on appveyor
+  - os: osx
+    env: FC=gfortran
+    before_install:
+    - brew install gcc > /dev/null
+    - brew install lapack > /dev/null
+
+install:
+- cd build
+- cmake ..
+- cmake --build .
+
+script:  ctest --output-on-failure
