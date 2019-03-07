@@ -9,10 +9,11 @@ FindLapack
 * Michael Hirsch, Ph.D. www.scivision.dev
 * David Eklund
 
-Let Michael know if there are more MKl/Lapack/compiler combination you want.
+Let Michael know if there are more MKL / Lapack / compiler combination you want.
 Refer to https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
 
-Finds LAPACK library. Works with Netlib Lapack and Intel MKL,
+Finds LAPACK and LapackE libraries.
+Works with Netlib Lapack and Intel MKL,
 including for non-Intel compilers with Intel MKL.
 
 Why not the FindLapack.cmake built into CMake? It has a lot of old code for
@@ -22,7 +23,7 @@ infrequently used Lapack libraries and is unreliable for me.
 Parameters
 ^^^^^^^^^^
 
-COMPONENTS default to Netlib LAPACK, otherwise:
+COMPONENTS default to Netlib LAPACK / LapackE, otherwise:
 
 ``IntelPar``
   Intel MKL 32-bit integer with Intel OpenMP for ICC, GCC and PGCC
@@ -115,20 +116,31 @@ elseif(IntelSeq IN_LIST LAPACK_FIND_COMPONENTS)
     set(LAPACK_IntelSeq_FOUND true)
   endif()
 else()
+  find_package(Threads REQUIRED)
 
-   pkg_check_modules(LAPACK lapack)
-
-  find_library(LAPACK_LIBRARY
+  pkg_check_modules(LAPACK lapack)
+  find_library(LAPACK_LIB
     NAMES lapack
     HINTS ${LAPACK_LIBRARY_DIRS})
 
+
+  pkg_check_modules(LAPACKE lapacke)
+  find_library(LAPACKE_LIBRARY
+    NAMES lapacke
+    HINTS ${LAPACKE_LIBRARY_DIRS})
+
+  find_path(LAPACK_INCLUDE_DIR
+    NAMES lapacke.h
+    HINTS ${LAPACKE_INCLUDE_DIRS})
+
+  pkg_check_modules(BLAS blas)
   find_library(BLAS_LIBRARY
     NAMES refblas blas
-    HINTS ${LAPACK_LIBRARY_DIRS})
+    HINTS ${BLAS_LIBRARY_DIRS})
 
   mark_as_advanced(BLAS_LIBRARY)
 
-  list(APPEND LAPACK_LIBRARY ${BLAS_LIBRARY})
+  set(LAPACK_LIBRARY ${LAPACKE_LIBRARY} ${LAPACK_LIB} ${BLAS_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 include(FindPackageHandleStandardArgs)

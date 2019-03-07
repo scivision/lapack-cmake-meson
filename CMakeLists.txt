@@ -28,7 +28,7 @@ endif()
 
 add_executable(svd_c example_gesvd.c)
 target_include_directories(svd_c PRIVATE ${LAPACK_INCLUDE_DIRS})
-target_link_libraries(svd_c PRIVATE ${LAPACK_LIBRARIES})
+target_link_libraries(svd_c PRIVATE ${LAPACK_LIBRARIES} m)
 target_compile_definitions(svd_c PRIVATE USEMKL=${USEMKL})
 
 add_test(NAME C-SVD COMMAND svd_c)
