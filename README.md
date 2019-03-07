@@ -13,4 +13,15 @@ cd build
 cmake ..
 
 cmake --build .
+
+ctest -V
+```
+
+
+### Intel MKL
+
+To verify Intel MKL was used, in general you can prefix the command you use to run a program with `MKL_VERBOSE=1` like:
+
+```sh
+MKLVERBOSE=1 ./build/svd_c
 ```

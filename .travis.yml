@@ -18,11 +18,12 @@ matrix:
   include:
   - os: linux
   # - windows  # needs gfortran, straightforward to add but already on appveyor
-  - os: osx
-    env: FC=gfortran
-    before_install:
-    - brew install gcc > /dev/null
-    - brew install lapack > /dev/null
+#  - os: osx
+#    env: FC=gfortran
+#    before_install:
+#    - brew install gcc > /dev/null
+#    - brew install lapack > /dev/null
+    # lapackE is not in brew at this time
 
 install:
 - cd build
