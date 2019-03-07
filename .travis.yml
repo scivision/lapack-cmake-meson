@@ -8,10 +8,11 @@ git:
 
 #env: FC=gfortran-6
 
-#addons:
-#  apt:
+addons:
+  apt:
 #    sources: ubuntu-toolchain-r-test
-#    packages:
+    packages:
+    - liblapacke-dev
 #    - gfortran-6
 
 matrix:
