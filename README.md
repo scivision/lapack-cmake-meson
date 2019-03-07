@@ -2,7 +2,9 @@
 
 # Lapack with cmake
 
-A clean, modern FindLAPACK.cmake that works with Intel MKL or Netlib LAPACK for Fortran and LAPACKE (for C and C++).
+A clean, modern
+[FindLAPACK.cmake](./cmake/Modules/FindLAPACK.cmake)
+that works with Intel MKL or Netlib LAPACK for Fortran and LAPACKE (for C and C++).
 Uses PkgConfig in CMake to making finding Lapack / LapackE on Linux, MacOS and Windows more robust.
 
 ## prereq

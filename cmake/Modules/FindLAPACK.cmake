@@ -135,8 +135,13 @@ else()
       NAMES lapacke.h
       HINTS ${LAPACKE_INCLUDE_DIRS})
 
-    set(LAPACK_LAPACKE_FOUND true)
-    set(LAPACK_LIBRARY ${LAPACKE_LIBRARY})
+    if(LAPACKE_LIBRARY)
+      set(LAPACK_LAPACKE_FOUND true)
+      set(LAPACK_LIBRARY ${LAPACKE_LIBRARY})
+    else()
+      set(LAPACK_LAPACKE_FOUND false)
+    endif()
+
   else()
     unset(LAPACK_LIBRARY)
   endif()
@@ -146,6 +151,10 @@ else()
     NAMES refblas blas
     HINTS ${BLAS_LIBRARY_DIRS})
 
+  if(NOT BLAS_LIBRARY)
+    message(FATAL_ERROR "BLAS not found")
+  endif()
+
   mark_as_advanced(BLAS_LIBRARY)
 
   list(APPEND LAPACK_LIBRARY ${LAPACK_LIB} ${BLAS_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
@@ -154,7 +163,7 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   LAPACK
-  REQUIRED_VARS LAPACK_LIBRARY LAPACK_LIB BLAS_LIBRARY
+  REQUIRED_VARS LAPACK_LIBRARY
   HANDLE_COMPONENTS)
 
 if(LAPACK_FOUND)
