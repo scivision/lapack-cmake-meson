@@ -27,7 +27,9 @@ matrix:
 
 install:
 - cd build
-- cmake ..
+
+- cmake -DUSEFortran=true ..
+
 - cmake --build .
 
 script:  ctest --output-on-failure

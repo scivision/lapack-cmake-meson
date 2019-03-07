@@ -3,6 +3,7 @@ project(lapack_demo C)
 enable_testing()
 
 option(BUILD_SHARED_LIBS "static or shared libs")
+option(USEFortran "use Fortran example")
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   add_compile_options(-g -O0)
@@ -27,4 +28,8 @@ endif()
 
 
 add_subdirectory(c_src)
-add_subdirectory(fortran_src)
+
+if(USEFortran)
+  enable_language(Fortran)
+  add_subdirectory(fortran_src)
+endif()

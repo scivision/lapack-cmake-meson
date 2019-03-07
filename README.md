@@ -26,6 +26,14 @@ cmake --build .
 ctest -V
 ```
 
+### Fortran
+
+To enable the Fortran example, do the above with option:
+
+```sh
+cmake -DUSEFortran=true ..
+```
+
 
 ### Intel MKL
 
