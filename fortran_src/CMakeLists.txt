@@ -1,3 +1,6 @@
+if(NOT CMAKE_Fortran_COMPILER)
+  return()
+endif()
 
 add_executable(svd_f example_gesvd.f90)
 target_include_directories(svd_f PRIVATE ${LAPACK_INCLUDE_DIRS})

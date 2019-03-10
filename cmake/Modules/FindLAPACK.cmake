@@ -15,9 +15,17 @@ Refer to https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
 Finds LAPACK and LapackE libraries.
 Works with Netlib Lapack and Intel MKL,
 including for non-Intel compilers with Intel MKL.
+Intel MKL relies on having environment variable MKLROOT set, typically by sourcing
+mklvars.sh beforehand.
 
 Why not the FindLapack.cmake built into CMake? It has a lot of old code for
 infrequently used Lapack libraries and is unreliable for me.
+
+Tested with Netlib Lapack and Intel MKL on Linux, MacOS and Windows with:
+* GCC / Gfortran
+* Clang / Flang
+* PGI (pgcc, pgfortran)
+* Intel (icc, ifort)
 
 
 Parameters
@@ -50,7 +58,8 @@ References
 ^^^^^^^^^^
 
 * Pkg-Config and MKL:  https://software.intel.com/en-us/articles/intel-math-kernel-library-intel-mkl-and-pkg-config-tool
-
+* MKL for Windows: https://software.intel.com/en-us/mkl-windows-developer-guide-static-libraries-in-the-lib-intel64-win-directory
+* MKL Windows directories: https://software.intel.com/en-us/mkl-windows-developer-guide-high-level-directory-structure
 #]=======================================================================]
 
 
@@ -60,7 +69,7 @@ function(mkl_libs)
 # https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
 
 set(_mkl_libs ${ARGV})
-if(CMAKE_Fortran_COMPILER_ID STREQUAL GNU)
+if(CMAKE_Fortran_COMPILER_ID STREQUAL GNU AND Fortran IN_LIST project_languages)
   list(INSERT _mkl_libs 0 mkl_gf_lp64)
 endif()
 
@@ -69,8 +78,10 @@ foreach(s ${_mkl_libs})
            NAMES ${s}
            PATHS $ENV{MKLROOT}/lib
                  $ENV{MKLROOT}/lib/intel64
+                 $ENV{MKLROOT}/lib/intel64_win
                  $ENV{MKLROOT}/../compiler/lib
                  $ENV{MKLROOT}/../compiler/lib/intel64
+                 $ENV{MKLROOT}/../compiler/lib/intel64_win
            HINTS ${MKL_LIBRARY_DIRS}
            NO_DEFAULT_PATH)
   if(NOT LAPACK_${s}_LIBRARY)
@@ -84,7 +95,7 @@ if(NOT BUILD_SHARED_LIBS AND (UNIX AND NOT APPLE))
   set(LAPACK_LIB -Wl,--start-group ${LAPACK_LIB} -Wl,--end-group)
 endif()
 
-list(APPEND LAPACK_LIB ${MKL_LDFLAGS} pthread ${CMAKE_DL_LIBS} m)
+list(APPEND LAPACK_LIB pthread ${CMAKE_DL_LIBS} m)
 
 set(LAPACK_LIBRARY ${LAPACK_LIB} PARENT_SCOPE)
 set(LAPACK_INCLUDE_DIR $ENV{MKLROOT}/include ${MKL_INCLUDE_DIRS} PARENT_SCOPE)
@@ -92,6 +103,8 @@ set(LAPACK_INCLUDE_DIR $ENV{MKLROOT}/include ${MKL_INCLUDE_DIRS} PARENT_SCOPE)
 endfunction()
 
 #===============================================================================
+
+get_property(project_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
 find_package(PkgConfig)
 
@@ -104,7 +117,13 @@ endif()
 if(IntelPar IN_LIST LAPACK_FIND_COMPONENTS)
   pkg_check_modules(MKL mkl-${_mkltype}-lp64-iomp)
 
-  mkl_libs(mkl_intel_lp64 mkl_intel_thread mkl_core iomp5)
+  if(WINDOWS)
+    set(_mp iomp5md)
+  else()
+    set(_mp iomp5)
+  endif()
+
+  mkl_libs(mkl_intel_lp64 mkl_intel_thread mkl_core ${_mp})
 
   if(LAPACK_LIBRARY)
     set(LAPACK_IntelPar_FOUND true)

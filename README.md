@@ -16,6 +16,8 @@ Uses PkgConfig in CMake to making finding Lapack / LapackE on Linux, MacOS and W
 
 ## Example
 
+This example is for SVD computation using LapackE from C.
+
 ```sh
 cd build
 
@@ -26,14 +28,7 @@ cmake --build .
 ctest -V
 ```
 
-### Fortran
-
-To enable the Fortran example, do the above with option:
-
-```sh
-cmake -DUSEFortran=true ..
-```
-
+If you have a Fortran compiler, a Fortran Lapack example will also be built and tested.
 
 ### Intel MKL
 
