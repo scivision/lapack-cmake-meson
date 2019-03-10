@@ -39,6 +39,8 @@ COMPONENTS default to Netlib LAPACK / LapackE, otherwise:
   Intel MKL 32-bit integer without threading for ICC, GCC, and PGCC
 ``LAPACKE``
   Netlib LapackE for C / C++
+``MKL64``
+  MKL only: 64-bit integers  (default is 32-bit integers)
 
 
 Result Variables
@@ -70,7 +72,7 @@ function(mkl_libs)
 
 set(_mkl_libs ${ARGV})
 if(CMAKE_Fortran_COMPILER_ID STREQUAL GNU AND Fortran IN_LIST project_languages)
-  list(INSERT _mkl_libs 0 mkl_gf_lp64)
+  list(INSERT _mkl_libs 0 mkl_gf_${_mkl_bitflag}lp64)
 endif()
 
 foreach(s ${_mkl_libs})
@@ -114,8 +116,15 @@ else()
   set(_mkltype static)
 endif()
 
+
+set(_mkl_bitflag)
+if(MKL64 IN_LIST LAPACK_FIND_COMPONENTS)
+  set(_mkl_bitflag i)
+endif()
+
+
 if(IntelPar IN_LIST LAPACK_FIND_COMPONENTS)
-  pkg_check_modules(MKL mkl-${_mkltype}-lp64-iomp)
+  pkg_check_modules(MKL mkl-${_mkltype}-${_mkl_bitflag}lp64-iomp)
 
   if(WINDOWS)
     set(_mp iomp5md)
@@ -123,18 +132,24 @@ if(IntelPar IN_LIST LAPACK_FIND_COMPONENTS)
     set(_mp iomp5)
   endif()
 
-  mkl_libs(mkl_intel_lp64 mkl_intel_thread mkl_core ${_mp})
+  mkl_libs(mkl_intel_${_mkl_bitflag}lp64 mkl_intel_thread mkl_core ${_mp})
 
   if(LAPACK_LIBRARY)
     set(LAPACK_IntelPar_FOUND true)
+    if(MKL64 IN_LIST LAPACK_FIND_COMPONENTS)
+      set(LAPACK_MKL64_FOUND true)
+    endif()
   endif()
 elseif(IntelSeq IN_LIST LAPACK_FIND_COMPONENTS)
-  pkg_check_modules(MKL mkl-${_mkltype}-lp64-seq)
+  pkg_check_modules(MKL mkl-${_mkltype}-${_mkl_bitflag}lp64-seq)
 
-  mkl_libs(mkl_intel_lp64 mkl_sequential mkl_core)
+  mkl_libs(mkl_intel_${_mkl_bitflag}lp64 mkl_sequential mkl_core)
 
   if(LAPACK_LIBRARY)
     set(LAPACK_IntelSeq_FOUND true)
+    if(MKL64 IN_LIST LAPACK_FIND_COMPONENTS)
+      set(LAPACK_MKL64_FOUND true)
+    endif()
   endif()
 else()
   find_package(Threads REQUIRED)
