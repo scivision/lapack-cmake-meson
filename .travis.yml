@@ -6,13 +6,14 @@ git:
   depth: 25
   quiet: true
 
+env: FC=gfortran-6
 
 addons:
   apt:
-#    sources: ubuntu-toolchain-r-test
+    sources: ubuntu-toolchain-r-test
     packages:
     - liblapacke-dev
-    - gfortran
+    - gfortran-6
 
 matrix:
   include:
