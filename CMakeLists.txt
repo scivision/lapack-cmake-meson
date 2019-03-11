@@ -3,6 +3,8 @@ project(lapack_demo C)
 enable_testing()
 
 option(BUILD_SHARED_LIBS "static or shared libs")
+option(atlas "Atlas Lapack implementation")
+option(lapack95 "use Lapack95")
 
 # whatever options you might like
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -27,12 +29,20 @@ if(CMAKE_Fortran_COMPILER)
 endif()
 
 # Now we're ready to Find Lapack
-if(DEFINED ENV{MKLROOT})
-  find_package(LAPACK COMPONENTS IntelPar REQUIRED)
+set(USEMKL 0)
+if(atlas)
+  find_package(LAPACK COMPONENTS Atlas REQUIRED)
+  set(atlas 1)
+elseif(DEFINED ENV{MKLROOT})
+  if(lapack95)
+    find_package(LAPACK COMPONENTS IntelPar95 REQUIRED)
+  else()
+    find_package(LAPACK COMPONENTS IntelPar REQUIRED)
+  endif()
+
   set(USEMKL 1)
 else()
   find_package(LAPACK COMPONENTS LAPACKE REQUIRED)  # netlib -- apt install liblapacke-dev
-  set(USEMKL 0)
 endif()
 
 # here are some exmaple program using Lapack

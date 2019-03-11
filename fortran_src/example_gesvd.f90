@@ -1,26 +1,58 @@
-
-use, intrinsic :: iso_fortran_env, only: stderr=>error_unit, sp=>real32, compiler_version
+module demo_svd
+use, intrinsic :: iso_fortran_env, only: stderr=>error_unit, sp=>real32
 implicit none
 
 integer, parameter :: LRATIO=8
-integer, parameter :: M = 5, L = 3
+integer, parameter :: M=3, N=3
 
-integer :: Lwork, svdinfo
+integer, parameter :: Lwork = LRATIO*M !at least 5M for sgesvd
 
-real(sp) :: R(M,M), U(M,M),VT(M,M), S1(M-1,L), S2(M-1,L)
-real(sp) :: S(M,M),RWORK(LRATIO*M),ang(L),SWORK(LRATIO*M) !this Swork is real
+real(sp) :: U(M,M), VT(N,N)
+real(sp) :: S(N), SWORK(LRATIO*M) !this Swork is real
+
+interface
+  module integer function svd(A, B) result(info)
+    real(sp), intent(in) :: A(M, N), B(M, 1)
+  end function svd
+end interface
+
+contains
+
+subroutine errchk(info)
+
+integer, intent(in) :: info
+
+if (info /= 0) then
+  write(stderr,*) 'SGESVD return code', info
+  if (info > 0) write(stderr,'(A,I3,A)') 'index #',info,' has sigma=0'
+  stop 1
+endif
+
+end subroutine errchk
+
+end module demo_svd
+
+
+program demo
+use, intrinsic :: iso_fortran_env, only: compiler_version
+use demo_svd
+implicit none
+
+integer :: info
+real(sp) :: A(M, N), B(M,1)
 
 print *,compiler_version()
 
-LWORK = LRATIO*M !at least 5M for sgesvd
+A = reshape([3.,       1., 1., &
+             sqrt(2.), 2., 0., &
+             0.,       1., 1.], shape(A), order=[2,1])
 
-call sgesvd('A','N',M,M,R,M,S,U,M,VT,M, SWORK, LWORK,svdinfo)
+B = reshape([8., 4.+sqrt(2.), 5.], shape(B), order=[2,1])
 
-if (svdinfo /= 0) then
-  write(stderr,*) 'SGESVD return code',svdinfo,'  LWORK:',LWORK,'  M:',M
-  if (M /= LWORK/LRATIO) write(stderr,*) 'possible LWORK overflow'
-  stop 1
-endif
+
+info = svd(A, B)
+
+call errchk(info)
 
 print *,'OK: Fortran SVD'
 

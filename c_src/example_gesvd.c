@@ -40,6 +40,9 @@ from http://www.netlib.org/lapack/explore-html/d5/df8/example___d_g_e_s_v__colma
 
 #if USEMKL == 1
 #include "mkl_lapacke.h"
+#elif USEATLAS == 1
+#include "cblas.h"
+#include "clapack.h"
 #else
 #include "lapacke.h"
 #endif
@@ -48,11 +51,11 @@ from http://www.netlib.org/lapack/explore-html/d5/df8/example___d_g_e_s_v__colma
 int main(int argc, char **argv) {
 
      /* Locals */
-     lapack_int n, nrhs, lda, ldb, info;
-             int i, j;
+      int n, nrhs, lda, ldb, info;
+      int i, j;
      /* Local arrays */
              double *A, *b;
-             lapack_int *ipiv;
+             int *ipiv;
 
      /* Default Value */
          n = 5; nrhs = 1;
@@ -75,7 +78,7 @@ int main(int argc, char **argv) {
              if (A==NULL){ printf("error of memory allocation\n"); exit(0); }
              b = (double *)malloc(n*nrhs*sizeof(double)) ;
              if (b==NULL){ printf("error of memory allocation\n"); exit(0); }
-             ipiv = (lapack_int *)malloc(n*sizeof(lapack_int)) ;
+             ipiv = (int *)malloc(n*sizeof(int)) ;
              if (ipiv==NULL){ printf("error of memory allocation\n"); exit(0); }
 
      for( i = 0; i < n; i++ ) {
@@ -89,14 +92,16 @@ int main(int argc, char **argv) {
      //print_matrix_colmajor( "Entry Matrix A", n, n, A, lda );
      /* Print Right Rand Side */
      //print_matrix_colmajor( "Right Rand Side b", n, nrhs, b, ldb );
-     printf( "\n" );
+     //printf( "\n" );
 
      /* Executable statements */
-     printf( "LAPACKE_dgesv (row-major, high-level) Example Program Results\n" );
+     printf( "dgesv (row-major, high-level) Example Program Results\n" );
      /* Solve the equations A*X = B */
-     info = LAPACKE_dgesv( LAPACK_COL_MAJOR, n, nrhs, A, lda, ipiv,
-                     b, ldb );
-
+#if USEATLAS==1
+     info = clapack_dgesv( 102, n, nrhs, A, lda, ipiv, b, ldb );
+#else
+     info = LAPACKE_dgesv( LAPACK_COL_MAJOR, n, nrhs, A, lda, ipiv, b, ldb );
+#endif
      /* Check for the exact singularity */
      if( info > 0 ) {
              printf( "The diagonal element of the triangular factor of A,\n" );
