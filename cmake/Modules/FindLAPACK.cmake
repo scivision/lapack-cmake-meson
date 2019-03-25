@@ -77,7 +77,7 @@ function(mkl_libs)
 # https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
 
 set(_mkl_libs ${ARGV})
-if(CMAKE_Fortran_COMPILER_ID STREQUAL GNU AND Fortran IN_LIST project_languages)
+if(NOT WIN32 AND CMAKE_Fortran_COMPILER_ID STREQUAL GNU AND Fortran IN_LIST project_languages)
   list(INSERT _mkl_libs 0 mkl_gf_${_mkl_bitflag}lp64)
 endif()
 
@@ -101,7 +101,9 @@ if(NOT BUILD_SHARED_LIBS AND (UNIX AND NOT APPLE))
   set(LAPACK_LIB -Wl,--start-group ${LAPACK_LIB} -Wl,--end-group)
 endif()
 
-list(APPEND LAPACK_LIB ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS} m)
+if(NOT WIN32)
+  list(APPEND LAPACK_LIB ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS} m)
+endif()
 
 set(LAPACK_LIBRARY ${LAPACK_LIB} PARENT_SCOPE)
 set(LAPACK_INCLUDE_DIR $ENV{MKLROOT}/include ${MKL_INCLUDE_DIRS} PARENT_SCOPE)
@@ -112,9 +114,10 @@ endfunction()
 
 get_property(project_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
-find_package(PkgConfig)
-find_package(Threads)
-
+find_package(PkgConfig QUIET)
+if(NOT WIN32)
+  find_package(Threads)
+endif()
 # ==== generic MKL variables ====
 if(BUILD_SHARED_LIBS)
   set(_mkltype dynamic)
@@ -128,8 +131,8 @@ if(MKL64 IN_LIST LAPACK_FIND_COMPONENTS)
   set(_mkl_bitflag i)
 endif()
 
-if(WINDOWS)
-  set(_mp iomp5md)
+if(WIN32)
+  set(_mp libiomp5md)  # "lib" is indeed necessary, verified by multiple people on CMake 3.14.0
 else()
   set(_mp iomp5)
 endif()
@@ -200,7 +203,10 @@ elseif(Atlas IN_LIST LAPACK_FIND_COMPONENTS)
     set(LAPACK_Atlas_FOUND false)
   endif()
 
-  set(LAPACK_LIBRARY ${LAPACK_ATLAS} ${BLAS_C_ATLAS} ${BLAS_ATLAS} ${ATLAS_LIB} ${CMAKE_THREAD_LIBS_INIT})
+  set(LAPACK_LIBRARY ${LAPACK_ATLAS} ${BLAS_C_ATLAS} ${BLAS_ATLAS} ${ATLAS_LIB})
+  if(NOT WIN32)
+    list(APPEND LAPACK_LIBRARY ${CMAKE_THREAD_LIBS_INIT})
+  endif()
 
 else()  # find base LAPACK and BLAS, typically Netlib
 
@@ -253,7 +259,10 @@ else()  # find base LAPACK and BLAS, typically Netlib
 
   mark_as_advanced(BLAS_LIBRARY)
 
-  list(APPEND LAPACK_LIBRARY ${LAPACK_LIB} ${BLAS_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
+  list(APPEND LAPACK_LIBRARY ${LAPACK_LIB} ${BLAS_LIBRARY})
+  if(NOT WIN32)
+    list(APPEND LAPACK_LIBRARY ${CMAKE_THREAD_LIBS_INIT})
+  endif()
 endif()
 
 include(FindPackageHandleStandardArgs)

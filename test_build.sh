@@ -3,7 +3,7 @@
 cd "${0%/*}"  # change to directory of this script
 
 
-for cc in gcc /usr/bin/clang pgcc icc
+for cc in gcc clang pgcc icc
 do
 
 touch build/junk
