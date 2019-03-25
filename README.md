@@ -80,3 +80,17 @@ was used, run a program with `MKL_VERBOSE=1` like:
 * Windows CMake systems that don't want to use MSVC must in general include `cmake -G "MinGW Makefiles"` along with their other options.
   This is true for anything CMake is used for on Windows where Visual Studio is not wanted.
 
+### MKL + PGI on Windows
+
+Assuming you have already set `CC=pgcc` `CXX=pgc++` and `FC=pgfortran`, this will work with MKL for C and Fortran using the
+[free PGI Community Edition compilers](https://www.scivision.co/install-pgi-free-compiler/):
+
+```posh
+cd build
+
+cmake -G "MinGW Makefiles" ..
+
+cmake --build .
+
+ctest -V
+```

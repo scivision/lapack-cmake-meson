@@ -2,7 +2,9 @@ if(NOT CMAKE_Fortran_COMPILER)
   return()
 endif()
 
-if(NOT CMAKE_Fortran_COMPILER_ID IN_LIST "GNU;Intel")
+set(noneed GNU Intel)
+
+if(NOT WIN32 AND NOT CMAKE_Fortran_COMPILER_ID IN_LIST noneed)
   list(APPEND LDFLAGS -lgfortran)
 endif()
 

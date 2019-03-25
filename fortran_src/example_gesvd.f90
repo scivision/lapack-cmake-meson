@@ -34,14 +34,15 @@ end module demo_svd
 
 
 program demo
-use, intrinsic :: iso_fortran_env, only: compiler_version
+! FIXME not for PGI 18.10
+! use, intrinsic :: iso_fortran_env, only: compiler_version
 use demo_svd
 implicit none
 
 integer :: info
 real(sp) :: A(M, N), B(M,1)
 
-print *,compiler_version()
+! print *,compiler_version()
 
 A = reshape([3.,       1., 1., &
              sqrt(2.), 2., 0., &

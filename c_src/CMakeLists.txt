@@ -3,7 +3,7 @@ if(NOT USEMKL AND CMAKE_C_COMPILER_ID STREQUAL GNU)  # for old GCC
   list(APPEND LDFLAGS -lgfortran)
 endif()
 
-if(NOT MSVC)
+if(NOT WIN32)
   list(APPEND LDFLAGS m)
 endif()
 
