@@ -102,7 +102,7 @@ if(NOT BUILD_SHARED_LIBS AND (UNIX AND NOT APPLE))
 endif()
 
 if(NOT WIN32)
-  list(APPEND LAPACK_LIB ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS} m)
+  list(APPEND LAPACK_LIB Threads::Threads ${CMAKE_DL_LIBS} m)
 endif()
 
 set(LAPACK_LIBRARY ${LAPACK_LIB} PARENT_SCOPE)
@@ -205,7 +205,7 @@ elseif(Atlas IN_LIST LAPACK_FIND_COMPONENTS)
 
   set(LAPACK_LIBRARY ${LAPACK_ATLAS} ${BLAS_C_ATLAS} ${BLAS_ATLAS} ${ATLAS_LIB})
   if(NOT WIN32)
-    list(APPEND LAPACK_LIBRARY ${CMAKE_THREAD_LIBS_INIT})
+    list(APPEND LAPACK_LIBRARY Threads::Threads)
   endif()
 
 else()  # find base LAPACK and BLAS, typically Netlib
@@ -230,7 +230,7 @@ else()  # find base LAPACK and BLAS, typically Netlib
   if(LAPACKE IN_LIST LAPACK_FIND_COMPONENTS)
     pkg_check_modules(LAPACKE lapacke)
     find_library(LAPACKE_LIBRARY
-      NAMES lapacke lapack  # PGI lapack.lib has lapackE
+      NAMES lapacke # lapack  # FIXME: PGI lapack.lib has lapackE
       HINTS ${LAPACKE_LIBRARY_DIRS})
 
     find_path(LAPACK_INCLUDE_DIR
@@ -261,7 +261,7 @@ else()  # find base LAPACK and BLAS, typically Netlib
 
   list(APPEND LAPACK_LIBRARY ${LAPACK_LIB} ${BLAS_LIBRARY})
   if(NOT WIN32)
-    list(APPEND LAPACK_LIBRARY ${CMAKE_THREAD_LIBS_INIT})
+    list(APPEND LAPACK_LIBRARY Threads::Threads)
   endif()
 endif()
 

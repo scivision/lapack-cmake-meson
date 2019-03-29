@@ -8,11 +8,11 @@ option(lapack95 "use Lapack95")
 
 # whatever options you might like
 if(NOT MSVC)
-    if(CMAKE_BUILD_TYPE STREQUAL Debug)
-      add_compile_options(-g -O0)
-    else()
-      add_compile_options(-O3)
-    endif()
+  if(CMAKE_BUILD_TYPE STREQUAL Debug)
+
+  else()
+    add_compile_options(-O3)
+  endif()
 endif()
 # this ensures we use our clean FindLapack, instead of old factory FindLapack
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)

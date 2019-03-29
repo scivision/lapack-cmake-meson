@@ -8,7 +8,7 @@ if(NOT WIN32)
 endif()
 
 add_executable(svd_c example_gesvd.c)
-target_link_libraries(svd_c PRIVATE LAPACK::LAPACKE LAPACK::LAPACK LAPACK::BLAS ${LDFLAGS})
+target_link_libraries(svd_c PRIVATE ${LAPACK_LIBRARIES} ${LDFLAGS})
 target_compile_definitions(svd_c PRIVATE USEMKL=${USEMKL} USEATLAS=${atlas})
 
 add_test(NAME C-SVD COMMAND svd_c)
