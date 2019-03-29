@@ -46,7 +46,7 @@ cmake --build . --target RUN_TESTS
 
 ### Intel MKL
 
-Intel MKL is automatically detected by if 
+Intel MKL is automatically detected by if
 [`MKLROOT` environment variable is set](https://software.intel.com/en-us/mkl-windows-developer-guide-checking-your-installation).
 This variable should be set BEFORE using CMake as proscribed by Intel for your operating system, typically by running `mklvars` script.
 Here I assume you've installed MKL as appropriate for the
@@ -70,7 +70,7 @@ was used, run a program with `MKL_VERBOSE=1` like:
 
     ```posh
     set MKL_VERBOSE=1
-    
+
     build\c_src\Debug\svd_c
     ```
 
@@ -83,7 +83,7 @@ was used, run a program with `MKL_VERBOSE=1` like:
 ### MKL + PGI on Windows
 
 Assuming you have already set `CC=pgcc` `CXX=pgc++` and `FC=pgfortran`, this will work with MKL for C and Fortran using the
-[free PGI Community Edition compilers](https://www.scivision.co/install-pgi-free-compiler/):
+[free PGI Community Edition compilers](https://www.scivision.dev/install-pgi-free-compiler/):
 
 ```posh
 cd build
@@ -94,3 +94,7 @@ cmake --build .
 
 ctest -V
 ```
+
+## Meson
+
+Meson is not yet working for this package, the Meson.build is there for Meson developers working on this issue.

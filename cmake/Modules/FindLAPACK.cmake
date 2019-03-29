@@ -230,7 +230,7 @@ else()  # find base LAPACK and BLAS, typically Netlib
   if(LAPACKE IN_LIST LAPACK_FIND_COMPONENTS)
     pkg_check_modules(LAPACKE lapacke)
     find_library(LAPACKE_LIBRARY
-      NAMES lapacke
+      NAMES lapacke lapack  # PGI lapack.lib has lapackE
       HINTS ${LAPACKE_LIBRARY_DIRS})
 
     find_path(LAPACK_INCLUDE_DIR
@@ -274,6 +274,25 @@ find_package_handle_standard_args(
 if(LAPACK_FOUND)
   set(LAPACK_LIBRARIES ${LAPACK_LIBRARY})
   set(LAPACK_INCLUDE_DIRS ${LAPACK_INCLUDE_DIR})
+  
+  if(LAPACK_LAPACKE_FOUND AND NOT TARGET LAPACK::LAPACKE)
+    add_library(LAPACK::LAPACKE UNKNOWN IMPORTED)
+    set_target_properties(LAPACK::LAPACKE PROPERTIES
+      IMPORTED_LOCATION ${LAPACKE_LIBRARY}
+      INTERFACE_INCLUDE_DIRECTORIES ${LAPACK_INCLUDE_DIR})
+  endif()
+   
+  if(NOT TARGET LAPACK::LAPACK)
+    add_library(LAPACK::LAPACK UNKNOWN IMPORTED)
+    set_target_properties(LAPACK::LAPACK PROPERTIES
+      IMPORTED_LOCATION ${LAPACK_LIB})
+  endif()
+ 
+  if(NOT TARGET LAPACK::BLAS)
+    add_library(LAPACK::BLAS UNKNOWN IMPORTED)
+    set_target_properties(LAPACK::BLAS PROPERTIES
+      IMPORTED_LOCATION ${BLAS_LIBRARY})
+  endif()
 endif()
 
 mark_as_advanced(LAPACK_LIBRARY LAPACK_INCLUDE_DIR)
