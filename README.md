@@ -33,15 +33,7 @@ ctest -V
 If you have a Fortran compiler, a Fortran Lapack example will also be built and tested.
 
 
-For MSVC compilers, only the C example is built.
-
-```sh
-cd build
-
-cmake -G "Visual Studio 15 2017" -A x64 ..
-
-cmake --build . --target RUN_TESTS
-```
+For MSVC compilers, only the C example is built, and requires Intel MKL--use [build_msvc.bat](./build_msvc.bat)
 
 
 ### Intel MKL
@@ -83,17 +75,10 @@ was used, run a program with `MKL_VERBOSE=1` like:
 ### MKL + PGI on Windows
 
 Assuming you have already set `CC=pgcc` `CXX=pgc++` and `FC=pgfortran`, this will work with MKL for C and Fortran using the
-[free PGI Community Edition compilers](https://www.scivision.dev/install-pgi-free-compiler/):
+[free PGI Community Edition compilers](https://www.scivision.dev/install-pgi-free-compiler/)
+in
+[build_pgi.bat](./build_pgi.bat)
 
-```posh
-cd build
-
-cmake -G "MinGW Makefiles" ..
-
-cmake --build .
-
-ctest -V
-```
 
 ## Meson
 
