@@ -4,8 +4,33 @@
 
 A clean, modern
 [FindLAPACK.cmake](./cmake/Modules/FindLAPACK.cmake)
-that works with Intel MKL or Netlib LAPACK for Fortran and LAPACKE (for C and C++).
-Uses PkgConfig in CMake to making finding Lapack / LapackE on Linux, MacOS and Windows more robust.
+with verified compatibility across a wide range of compilers, operating systems and Lapack vendors.
+Uses PkgConfig in CMake to make finding Lapack / LapackE more robust.
+
+Here is a brief listing of known working configurations:
+
+Windows:
+
+Compiler | Lapack
+---------|-------
+MSVC 15 2017 | Intel MKL
+PGI 18 | Intel MKL
+
+
+Linux:
+
+Compiler | Lapack
+---------|-------
+gcc + gfortran | Netlib Lapack
+gcc + gfortran | Intel MKL
+gcc + gfortran | Atlas
+Clang + gfortran  | Netlib Lapack
+Clang + gfortran  | Intel MKL
+Clang + gfortran  | Atlas
+Clang + Flang | Netlib Lapack
+Clang + Flang | Intel MKL
+Clang + Flang | Atlas
+
 
 ## prereq
 

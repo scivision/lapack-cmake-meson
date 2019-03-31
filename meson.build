@@ -11,16 +11,17 @@ lapack95 = get_option('lapack95')
 # Now we're ready to Find Lapack
 
 if atlas == 1
-  lapack = dependency('LAPACK', cmake_module_path: 'cmake/Modules')
+  lapack = dependency('lapack')
 elif usemkl == 1
   if lapack95 == 1
-    lapack = dependency('LAPACK', cmake_module_path: 'cmake/Modules')
+    lapack = dependency('lapack')
   else
-    lapack = dependency('LAPACK', cmake_module_path: 'cmake/Modules')
+    lapack = dependency('lapack')
   endif
 else
-  lapack = dependency('LAPACK', method: 'cmake', cmake_module_path: 'cmake/Modules',
-                      modules: ['LAPACK::LAPACKE', 'LAPACK::LAPACK', 'LAPACK::BLAS'])
+  lapacke = dependency('lapacke')
+  lapack = dependency('lapack')
+  lapack = [lapacke, lapack]
   # netlib -- apt install liblapacke-dev
 endif
 # here are some example program using Lapack

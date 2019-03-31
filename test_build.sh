@@ -1,15 +1,24 @@
-#!/bin/sh
+#!/bin/bash
 
 cd "${0%/*}"  # change to directory of this script
 
+fc=$1
+
+bindir=build
 
 for cc in gcc clang pgcc icc
 do
 
-touch build/junk
-rm -r build/*
+[[ $(which $cc) ]] || continue
 
-CC=$cc cmake -B build -S .
-cmake --build build
+rm -r $bindir/CMakeCache.txt
+
+CC=$cc cmake -B $bindir -S .
+
+[[ $? == 0 ]] && cmake --build $bindir
+
+[[ $? == 0 ]] && (cd $bindir; ctest)
 
 done
+
+rm -r $bindir/CMakeCache.txt

@@ -1,5 +1,7 @@
 
-if(NOT USEMKL AND CMAKE_C_COMPILER_ID STREQUAL GNU)  # for old GCC
+set(need_gf GNU Clang)
+
+if(NOT USEMKL AND CMAKE_C_COMPILER_ID IN_LIST need_gf)
   list(APPEND LDFLAGS -lgfortran)
 endif()
 

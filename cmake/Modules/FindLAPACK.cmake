@@ -102,7 +102,7 @@ if(NOT BUILD_SHARED_LIBS AND (UNIX AND NOT APPLE))
 endif()
 
 if(NOT WIN32)
-  list(APPEND LAPACK_LIB Threads::Threads ${CMAKE_DL_LIBS} m)
+  list(APPEND LAPACK_LIB ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS} m)
 endif()
 
 set(LAPACK_LIBRARY ${LAPACK_LIB} PARENT_SCOPE)
@@ -116,7 +116,7 @@ get_property(project_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
 find_package(PkgConfig QUIET)
 if(NOT WIN32)
-  find_package(Threads)
+  find_package(Threads)  # not required--for example Flang
 endif()
 # ==== generic MKL variables ====
 if(BUILD_SHARED_LIBS)
@@ -205,7 +205,7 @@ elseif(Atlas IN_LIST LAPACK_FIND_COMPONENTS)
 
   set(LAPACK_LIBRARY ${LAPACK_ATLAS} ${BLAS_C_ATLAS} ${BLAS_ATLAS} ${ATLAS_LIB})
   if(NOT WIN32)
-    list(APPEND LAPACK_LIBRARY Threads::Threads)
+    list(APPEND LAPACK_LIBRARY ${CMAKE_THREAD_LIBS_INIT})
   endif()
 
 else()  # find base LAPACK and BLAS, typically Netlib
@@ -261,7 +261,7 @@ else()  # find base LAPACK and BLAS, typically Netlib
 
   list(APPEND LAPACK_LIBRARY ${LAPACK_LIB} ${BLAS_LIBRARY})
   if(NOT WIN32)
-    list(APPEND LAPACK_LIBRARY Threads::Threads)
+    list(APPEND LAPACK_LIBRARY ${CMAKE_THREAD_LIBS_INIT})
   endif()
 endif()
 
@@ -274,20 +274,20 @@ find_package_handle_standard_args(
 if(LAPACK_FOUND)
   set(LAPACK_LIBRARIES ${LAPACK_LIBRARY})
   set(LAPACK_INCLUDE_DIRS ${LAPACK_INCLUDE_DIR})
-  
+
 #  if(LAPACK_LAPACKE_FOUND AND NOT TARGET LAPACK::LAPACKE)
 #    add_library(LAPACK::LAPACKE UNKNOWN IMPORTED)
 #    set_target_properties(LAPACK::LAPACKE PROPERTIES
 #      IMPORTED_LOCATION ${LAPACKE_LIBRARY}
 #      INTERFACE_INCLUDE_DIRECTORIES ${LAPACK_INCLUDE_DIR})
 #  endif()
-   
+
 #  if(NOT TARGET LAPACK::LAPACK)
 #    add_library(LAPACK::LAPACK UNKNOWN IMPORTED)
 #    set_target_properties(LAPACK::LAPACK PROPERTIES
 #      IMPORTED_LOCATION ${LAPACK_LIB})
 #  endif()
- 
+
 #  if(NOT TARGET LAPACK::BLAS)
 #    add_library(LAPACK::BLAS UNKNOWN IMPORTED)
 #    set_target_properties(LAPACK::BLAS PROPERTIES
