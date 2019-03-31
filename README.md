@@ -105,6 +105,3 @@ in
 [build_pgi.bat](./build_pgi.bat)
 
 
-## Meson
-
-Meson is not yet working for this package, the Meson.build is there for Meson developers working on this issue.

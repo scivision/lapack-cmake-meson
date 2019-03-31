@@ -5,7 +5,7 @@ contains
 module procedure svd
 !! For lapack95 and atlas, the sgesv API is:
 !!  sgesv( N, nrhs, a, lda, ipiv, b, ldb, info )
-integer :: ipiv(N), i
+integer :: ipiv(N)
 real :: truthX(M), errmag(M)
 
 call sgesv(M, size(B,2), A, M, ipiv, B, M, info)
