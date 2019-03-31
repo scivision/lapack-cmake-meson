@@ -31,9 +31,7 @@ elif usemkl == 1
     lapack = dependency('lapack', modules: 'mkl')
   endif
 else # netlib -- apt install liblapacke-dev
-  lapacke = dependency('lapacke')
   lapack = dependency('lapack')
-  lapack = [lapacke, lapack]
 endif
 # here are some example program using Lapack
 subdir('c_src')
