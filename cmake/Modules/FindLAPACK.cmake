@@ -220,6 +220,14 @@ else()  # find base LAPACK and BLAS, typically Netlib
                    NAMES lapack95
                    PATHS ${LAPACK95_ROOT}
                    PATH_SUFFIXES lib)
+
+    if(LAPACK95_LIBRARY)
+      set(LAPACK_INCLUDE_DIR ${LAPACK95_INCLUDE_DIR})
+      set(LAPACK_LAPACK95_FOUND true)
+      set(LAPACK_LIBRARY ${LAPACK95_LIBRARY})
+    endif()
+  else()
+    unset(LAPACK_LIBRARY)
   endif()
 
   pkg_check_modules(LAPACK lapack)
@@ -233,19 +241,17 @@ else()  # find base LAPACK and BLAS, typically Netlib
       NAMES lapacke # lapack  # FIXME: PGI lapack.lib has lapackE
       HINTS ${LAPACKE_LIBRARY_DIRS})
 
-    find_path(LAPACK_INCLUDE_DIR
+    find_path(LAPACKE_INCLUDE_DIR
       NAMES lapacke.h
       HINTS ${LAPACKE_INCLUDE_DIRS})
 
     if(LAPACKE_LIBRARY)
       set(LAPACK_LAPACKE_FOUND true)
-      set(LAPACK_LIBRARY ${LAPACKE_LIBRARY})
+      list(APPEND LAPACK_INCLUDE_DIR ${LAPACKE_INCLUDE_DIR})
+      list(APPEND LAPACK_LIBRARY ${LAPACKE_LIBRARY})
     else()
       set(LAPACK_LAPACKE_FOUND false)
     endif()
-
-  else()
-    unset(LAPACK_LIBRARY)
   endif()
 
   pkg_check_modules(BLAS blas)
