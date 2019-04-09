@@ -58,7 +58,11 @@ ctest -V
 If you have a Fortran compiler, a Fortran Lapack example will also be built and tested.
 
 
-For MSVC compilers, only the C example is built, and requires Intel MKL--use [build_msvc.bat](./build_msvc.bat)
+For MSVC compilers, only the C example is built, and requires Intel MKL:
+
+```sh
+python build.py msvc
+```
 
 
 ### Intel MKL
@@ -101,7 +105,9 @@ was used, run a program with `MKL_VERBOSE=1` like:
 
 Assuming you have already set `CC=pgcc` `CXX=pgc++` and `FC=pgfortran`, this will work with MKL for C and Fortran using the
 [free PGI Community Edition compilers](https://www.scivision.dev/install-pgi-free-compiler/)
-in
-[build_pgi.bat](./build_pgi.bat)
+
+```sh
+python build.py pgi
+```
 
 

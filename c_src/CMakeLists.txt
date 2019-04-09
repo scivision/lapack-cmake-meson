@@ -1,3 +1,6 @@
+if(WIN32 AND CMAKE_C_COMPILER_ID STREQUAL GNU AND USEMKL)
+  return()
+endif()
 
 set(need_gf GNU Clang)
 

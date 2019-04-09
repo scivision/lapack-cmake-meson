@@ -2,6 +2,10 @@ if(NOT CMAKE_Fortran_COMPILER)
   return()
 endif()
 
+if(WIN32 AND CMAKE_Fortran_COMPILER_ID STREQUAL GNU AND USEMKL)
+  return()
+endif()
+
 set(noneed GNU Intel)
 
 if(NOT WIN32 AND NOT CMAKE_Fortran_COMPILER_ID IN_LIST noneed)
