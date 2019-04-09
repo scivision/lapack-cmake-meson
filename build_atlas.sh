@@ -9,7 +9,7 @@ cd "${0%/*}"  # change to directory of this script
 
 bindir=build
 
-rm -rf $bindir/CMakeCache.txt
+rm -f $bindir/CMakeCache.txt
 
 CC=$cc FC=$fc cmake -Datlas=1 -B $bindir -S .
 

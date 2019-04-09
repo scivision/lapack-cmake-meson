@@ -13,5 +13,4 @@ cmake --build .
 
 set MKL_VERBOSE=1
 
-
 ctest -V
