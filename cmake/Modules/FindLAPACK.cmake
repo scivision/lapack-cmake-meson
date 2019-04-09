@@ -230,7 +230,7 @@ else()  # find base LAPACK and BLAS, typically Netlib
     unset(LAPACK_LIBRARY)
   endif()
 
-  pkg_check_modules(LAPACK lapack)
+  pkg_check_modules(LAPACK lapack-netlib)
   find_library(LAPACK_LIB
     NAMES lapack
     HINTS ${LAPACK_LIBRARY_DIRS})
@@ -254,7 +254,7 @@ else()  # find base LAPACK and BLAS, typically Netlib
     endif()
   endif()
 
-  pkg_check_modules(BLAS blas)
+  pkg_check_modules(BLAS openblas)
   find_library(BLAS_LIBRARY
     NAMES refblas blas
     HINTS ${BLAS_LIBRARY_DIRS})
