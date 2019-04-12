@@ -106,7 +106,11 @@ if(NOT WIN32)
 endif()
 
 set(LAPACK_LIBRARY ${LAPACK_LIB} PARENT_SCOPE)
-set(LAPACK_INCLUDE_DIR $ENV{MKLROOT}/include ${MKL_INCLUDE_DIRS} PARENT_SCOPE)
+set(LAPACK_INCLUDE_DIR
+  $ENV{MKLROOT}/include
+  $ENV{MKLROOT}/include/intel64/${_mkl_bitflag}lp64
+  ${MKL_INCLUDE_DIRS}
+  PARENT_SCOPE)
 
 endfunction()
 
@@ -258,10 +262,6 @@ else()  # find base LAPACK and BLAS, typically Netlib
   find_library(BLAS_LIBRARY
     NAMES refblas blas
     HINTS ${BLAS_LIBRARY_DIRS})
-
-  if(NOT BLAS_LIBRARY)
-    message(FATAL_ERROR "BLAS not found")
-  endif()
 
   mark_as_advanced(BLAS_LIBRARY)
 
