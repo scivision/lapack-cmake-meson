@@ -24,6 +24,7 @@ MSVC requires MKL too
 """
 from pathlib import Path
 import os
+import sys
 import shutil
 import subprocess
 from typing import Dict
@@ -39,12 +40,12 @@ def do_build(build: Path, src: Path, compilers: Dict[str, str],
     attempts build with Meson or CMake
     TODO: Meson needs better Lapack finding
     """
-    # try:
-    #     meson_setup(build, src, compilers)
-    # except (FileNotFoundError, RuntimeError):
-    #    cmake_setup(build, src, compilers)
+    try:
+        meson_setup(build, src, compilers, wipe)
+    except (ImportError, FileNotFoundError, RuntimeError):
+        cmake_setup(build, src, compilers, wipe)
 
-    cmake_setup(build, src, compilers, wipe)
+    # cmake_setup(build, src, compilers, wipe)
 
 
 def _needs_wipe(fn: Path, wipe: bool) -> bool:
@@ -122,7 +123,9 @@ def meson_setup(build: Path, src: Path, compilers: Dict[str, str],
     """
     attempt to build with Meson + Ninja
     """
-    meson_exe = shutil.which('meson')
+
+    meson_exe = [shutil.which('meson')]
+
     ninja_exe = shutil.which('ninja')
 
     if not meson_exe or not ninja_exe:
@@ -130,13 +133,13 @@ def meson_setup(build: Path, src: Path, compilers: Dict[str, str],
 
     build_ninja = build / 'build.ninja'
 
-    meson_setup = [meson_exe, 'setup']
+    meson_setup = meson_exe + ['setup']
     if wipe and build_ninja.is_file():
         meson_setup.append('--wipe')
     meson_setup += [str(build), str(src)]
 
     if wipe or not build_ninja.is_file():
-        subprocess.check_call(meson_setup, env=compilers)
+        subprocess.check_call(meson_setup, env=os.environ.update(compilers))
 
     ret = subprocess.run([ninja_exe, '-C', str(build)], stderr=subprocess.PIPE,
                          universal_newlines=True)
