@@ -1,4 +1,4 @@
-if(WIN32 AND CMAKE_C_COMPILER_ID STREQUAL GNU AND USEMKL)
+if(NOT CMAKE_C_COMPILER)
   return()
 endif()
 
@@ -20,3 +20,6 @@ target_compile_definitions(svd_c PRIVATE USEMKL=${USEMKL} USEATLAS=${atlas})
 add_test(NAME C-SVD COMMAND svd_c)
 set_tests_properties(C-SVD PROPERTIES
   ENVIRONMENT MKL_VERBOSE=1)
+
+# just for demonstrating concept
+install(TARGETS svd_c)

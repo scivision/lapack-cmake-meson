@@ -6,14 +6,11 @@ option(BUILD_SHARED_LIBS "static or shared libs")
 option(atlas "Atlas Lapack implementation")
 option(lapack95 "use Lapack95")
 
-# whatever options you might like
-if(NOT MSVC)
-  if(CMAKE_BUILD_TYPE STREQUAL Debug)
-
-  else()
-    add_compile_options(-O3)
-  endif()
+if(NOT CMAKE_BUILD_TYPE)
+  # must have FORCE or it won't take effect
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Debug or Release" FORCE)
 endif()
+
 # this ensures we use our clean FindLapack, instead of old factory FindLapack
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
@@ -35,13 +32,12 @@ if(atlas)
   find_package(LAPACK COMPONENTS Atlas REQUIRED)
   set(atlas 1)
 elseif(DEFINED ENV{MKLROOT})
+  set(USEMKL 1)
   if(lapack95)
-    find_package(LAPACK COMPONENTS IntelPar95 REQUIRED)
+    find_package(LAPACK COMPONENTS IntelPar LAPACK95 REQUIRED)
   else()
     find_package(LAPACK COMPONENTS IntelPar REQUIRED)
   endif()
-
-  set(USEMKL 1)
 else()
   find_package(LAPACK COMPONENTS LAPACKE REQUIRED)  # netlib -- apt install liblapacke-dev
 endif()
@@ -50,3 +46,14 @@ endif()
 add_subdirectory(c_src)
 
 add_subdirectory(fortran_src)
+
+# install (just for demonstrating concept)
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  if(WIN32)
+    set(HOME $ENV{USERPROFILE})
+  else()
+    set(HOME $ENV{HOME})
+  endif()
+
+  set(CMAKE_INSTALL_PREFIX "${HOME}/lapack_demo" CACHE PATH "..." FORCE)
+endif()

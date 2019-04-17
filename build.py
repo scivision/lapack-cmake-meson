@@ -24,28 +24,31 @@ MSVC requires MKL too
 """
 from pathlib import Path
 import os
-import sys
 import shutil
 import subprocess
-from typing import Dict
+from typing import Dict, List, Tuple
 from argparse import ArgumentParser
 
 MSVC = 'Visual Studio 15 2017'
 
 
 # %% function
-def do_build(build: Path, src: Path, compilers: Dict[str, str],
-             wipe: bool = True):
+def do_build(build: Path, src: Path,
+             compilers: Dict[str, str],
+             args: List[str],
+             wipe: bool = True,
+             dotest: bool = True,
+             install: str = None):
     """
     attempts build with Meson or CMake
     TODO: Meson needs better Lapack finding
     """
-    try:
-        meson_setup(build, src, compilers, wipe)
-    except (ImportError, FileNotFoundError, RuntimeError):
-        cmake_setup(build, src, compilers, wipe)
+#    try:
+#        meson_setup(build, src, compilers, args, wipe, dotest, install)
+#    except (ImportError, FileNotFoundError, RuntimeError):
+#        cmake_setup(build, src, compilers, args, wipe, dotest, install)
 
-    # cmake_setup(build, src, compilers, wipe)
+    cmake_setup(build, src, compilers, args, wipe, dotest, install)
 
 
 def _needs_wipe(fn: Path, wipe: bool) -> bool:
@@ -75,7 +78,9 @@ def _needs_wipe(fn: Path, wipe: bool) -> bool:
 
 
 def cmake_setup(build: Path, src: Path, compilers: Dict[str, str],
-                wipe: bool = True):
+                args: List[str],
+                wipe: bool = True, dotest: bool = True,
+                install: str = None):
     """
     attempt to build using CMake >= 3
     """
@@ -89,6 +94,11 @@ def cmake_setup(build: Path, src: Path, compilers: Dict[str, str],
         wopts = ['-G', 'MinGW Makefiles', '-DCMAKE_SH="CMAKE_SH-NOTFOUND']
     else:
         wopts = []
+
+    wopts += args
+
+    if isinstance(install, str) and install.strip():  # path specified
+        wopts.append('-DCMAKE_INSTALL_PREFIX:PATH='+str(Path(install).expanduser()))
 
     cachefile = build / 'CMakeCache.txt'
 
@@ -107,19 +117,25 @@ def cmake_setup(build: Path, src: Path, compilers: Dict[str, str],
     test_result(ret)
     if ret.returncode:
         return
-    # %% test
-    ctest_exe = shutil.which('ctest')
-    if not ctest_exe:
-        raise FileNotFoundError('CTest not available')
+# %% test
+    if dotest:
+        ctest_exe = shutil.which('ctest')
+        if not ctest_exe:
+            raise FileNotFoundError('CTest not available')
 
-    if compilers['CC'] == 'cl':
-        subprocess.check_call([cmake_exe, '--build', str(build), '--target', 'RUN_TESTS'])
-    else:
-        subprocess.check_call([ctest_exe, '--output-on-failure'], cwd=build)
+        if compilers['CC'] == 'cl':
+            subprocess.check_call([cmake_exe, '--build', str(build), '--target', 'RUN_TESTS'])
+        else:
+            subprocess.check_call([ctest_exe, '--output-on-failure'], cwd=build)
+# %% install
+    if install is not None:  # blank '' or ' ' etc. will use dfault install path
+        subprocess.check_call([cmake_exe, '--build', str(build), '--target', 'install'])
 
 
 def meson_setup(build: Path, src: Path, compilers: Dict[str, str],
-                wipe: bool = True):
+                args: List[str],
+                wipe: bool = True, dotest: bool = True,
+                install: str = None):
     """
     attempt to build with Meson + Ninja
     """
@@ -133,7 +149,11 @@ def meson_setup(build: Path, src: Path, compilers: Dict[str, str],
 
     build_ninja = build / 'build.ninja'
 
-    meson_setup = meson_exe + ['setup']
+    meson_setup = meson_exe + ['setup'] + args
+
+    if isinstance(install, str) and install.strip():  # path specified
+        meson_setup.append('--prefix '+str(Path(install).expanduser()))
+
     if wipe and build_ninja.is_file():
         meson_setup.append('--wipe')
     meson_setup += [str(build), str(src)]
@@ -146,8 +166,13 @@ def meson_setup(build: Path, src: Path, compilers: Dict[str, str],
 
     test_result(ret)
 
-    if not ret.returncode:
-        subprocess.check_call([meson_exe, 'test', '-C', str(build)])
+    if dotest:
+        if not ret.returncode:
+            subprocess.check_call([meson_exe, 'test', '-C', str(build)])  # type: ignore     # MyPy bug
+
+    if install:
+        if not ret.returncode:
+            subprocess.check_call([meson_exe, 'install', '-C', str(build)])  # type: ignore     # MyPy bug
 
 
 def test_result(ret: subprocess.CompletedProcess):
@@ -157,17 +182,26 @@ def test_result(ret: subprocess.CompletedProcess):
         raise RuntimeError(ret.stderr)
 
 
-def clang_params() -> Dict[str, str]:
-    return {'CC': 'clang', 'CXX': 'clang++', 'FC': 'flang'}
+# %% compilers
+def clang_params(impl: str) -> Tuple[Dict[str, str], List[str]]:
+    compilers = {'CC': 'clang', 'CXX': 'clang++', 'FC': 'flang'}
+
+    args = ['-Datlas=1'] if impl == 'atlas' else []
+
+    return compilers, args
 
 
-def gnu_params() -> Dict[str, str]:
-    return {'FC': 'gfortran', 'CC': 'gcc', 'CXX': 'g++'}
+def gnu_params(impl: str) -> Tuple[Dict[str, str], List[str]]:
+    compilers = {'FC': 'gfortran', 'CC': 'gcc', 'CXX': 'g++'}
+
+    args = ['-Datlas=1'] if impl == 'atlas' else []
+
+    return compilers, args
 
 
-def intel_params() -> Dict[str, str]:
+def intel_params() -> Tuple[Dict[str, str], List[str]]:
     if not os.environ.get('MKLROOT'):
-        raise EnvironmentError('must have set MKLROOT by running compilervar.bat or source compilervars.sh before this script.')
+        raise EnvironmentError('must have set MKLROOT by running compilervars.bat or source compilervars.sh before this script.')
 
     # %% compiler variables
     compilers = {'FC': 'ifort'}
@@ -177,17 +211,23 @@ def intel_params() -> Dict[str, str]:
         compilers['CC'] = 'icc'
         compilers['CXX'] = 'icpc'
 
-    return compilers
+    args: List[str] = []
+
+    return compilers, args
 
 
-def msvc_params() -> Dict[str, str]:
+def msvc_params() -> Tuple[Dict[str, str], List[str]]:
     if not shutil.which('cl'):
         raise EnvironmentError('Must have PATH set to include MSVC cl.exe compiler bin directory')
 
-    return {'CC': 'cl', 'CXX': 'cl'}
+    compilers = {'CC': 'cl', 'CXX': 'cl'}
+
+    args: List[str] = []
+
+    return compilers, args
 
 
-def pgi_params() -> Dict[str, str]:
+def pgi_params(impl: str) -> Tuple[Dict[str, str], List[str]]:
     if not shutil.which('pgcc') or not shutil.which('pgfortran'):
         raise EnvironmentError('Must have PATH set to include PGI compiler bin directory')
 
@@ -197,29 +237,37 @@ def pgi_params() -> Dict[str, str]:
         # pgc++ is not on Windows at this time
         compilers['CXX'] = 'pgc++'
 
-    return compilers
+    args = ['-Datlas=1'] if impl == 'atlas' else []
+
+    return compilers, args
 
 
 if __name__ == '__main__':
     p = ArgumentParser()
     p.add_argument('vendor', help='compiler vendor [clang, gnu, intel, msvc, pgi]')
     p.add_argument('-wipe', help='wipe and rebuild from scratch', action='store_true')
+    p.add_argument('-i', '--implementation',
+                   help='which LAPACK implementation')
+    p.add_argument('-n', '--no-test', help='do not run self-test / example', action='store_false')
+    p.add_argument('-install', help='specify directory to install to')
     a = p.parse_args()
     # Must have .resolve() to work in general regardless of invocation directory
     src = Path(__file__).parent.resolve()
     build = src / 'build'
 
+    dotest = a.no_test
+
     if a.vendor == 'clang':
-        compilers = clang_params()
-    elif a.vendor == 'gnu':
-        compilers = gnu_params()
+        compilers, args = clang_params(a.implementation)
+    elif a.vendor in ('gnu', 'gcc'):
+        compilers, args = gnu_params(a.implementation)
     elif a.vendor == 'intel':
-        compilers = intel_params()
+        compilers, args = intel_params()
     elif a.vendor == 'msvc':
-        compilers = msvc_params()
+        compilers, args = msvc_params()
     elif a.vendor == 'pgi':
-        compilers = pgi_params()
+        compilers, args = pgi_params(a.implementation)
     else:
         raise ValueError('unknown compiler vendor {}'.format(a.vendor))
 
-    do_build(build, src, compilers, a.wipe)
+    do_build(build, src, compilers, args, a.wipe, dotest, a.install)
