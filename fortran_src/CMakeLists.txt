@@ -15,11 +15,11 @@ else()
   target_sources(svd_f PRIVATE lapack_svd.f90)
 endif()
 target_link_libraries(svd_f PRIVATE ${LAPACK_LIBRARIES} ${LDFLAGS})
-target_compile_definitions(svd_f PRIVATE USEMKL=${USEMKL})
 
 add_test(NAME Fortran-SVD COMMAND svd_f)
 set_tests_properties(Fortran-SVD PROPERTIES
   ENVIRONMENT MKL_VERBOSE=1)
 
 # just for demonstrating concept
-install(TARGETS svd_f)
+install(TARGETS svd_f
+  RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})

@@ -63,23 +63,23 @@ int main(int argc, char **argv) {
      /* Arguments */
          for( i = 1; i < argc; i++ ) {
              if( strcmp( argv[i], "-n" ) == 0 ) {
-                     n  = atoi(argv[i+1]);
-                         i++;
+                   n  = atoi(argv[i+1]);
+                   i++;
                  }
                      if( strcmp( argv[i], "-nrhs" ) == 0 ) {
-                             nrhs  = atoi(argv[i+1]);
-                             i++;
+                         nrhs  = atoi(argv[i+1]);
+                         i++;
                      }
              }
 
      /* Initialization */
      lda=n, ldb=n;
              A = (double *)malloc(n*n*sizeof(double)) ;
-             if (A==NULL){ printf("error of memory allocation\n"); exit(0); }
+             if (A==NULL){ printf("error of memory allocation\n"); return 1; }
              b = (double *)malloc(n*nrhs*sizeof(double)) ;
-             if (b==NULL){ printf("error of memory allocation\n"); exit(0); }
+             if (b==NULL){ printf("error of memory allocation\n"); return 1; }
              ipiv = (int *)malloc(n*sizeof(int)) ;
-             if (ipiv==NULL){ printf("error of memory allocation\n"); exit(0); }
+             if (ipiv==NULL){ printf("error of memory allocation\n"); return 1; }
 
      for( i = 0; i < n; i++ ) {
              for( j = 0; j < n; j++ ) A[i+j*lda] = ((double) rand()) / ((double) RAND_MAX) - 0.5;
@@ -107,14 +107,14 @@ int main(int argc, char **argv) {
              printf( "The diagonal element of the triangular factor of A,\n" );
              printf( "U(%i,%i) is zero, so that A is singular;\n", info, info );
              printf( "the solution could not be computed.\n" );
-             exit( 1 );
+             return 1;
      }
-     if (info <0) exit( 1 );
+     if (info < 0) return 1;
      /* Print solution */
      // print_matrix_colmajor( "Solution", n, nrhs, b, ldb );
      /* Print details of LU factorization */
     // print_matrix_colmajor( "Details of LU factorization", n, n, A, lda );
      /* Print pivot indices */
      // print_vector( "Pivot indices", n, ipiv );
-     exit( 0 );
+     return 0;
 } /* End of LAPACKE_dgesv Example */

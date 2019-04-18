@@ -13,7 +13,7 @@ if(NOT WIN32)
 endif()
 
 add_executable(svd_c example_gesvd.c)
-target_include_directories(svd_c PRIVATE ${LAPACK_INCLUDE_DIRS})
+target_include_directories(svd_c PRIVATE ${LAPACK_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(svd_c PRIVATE ${LAPACK_LIBRARIES} ${LDFLAGS})
 target_compile_definitions(svd_c PRIVATE USEMKL=${USEMKL} USEATLAS=${atlas})
 
@@ -22,4 +22,5 @@ set_tests_properties(C-SVD PROPERTIES
   ENVIRONMENT MKL_VERBOSE=1)
 
 # just for demonstrating concept
-install(TARGETS svd_c)
+install(TARGETS svd_c
+  RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})

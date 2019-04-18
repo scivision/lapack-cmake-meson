@@ -27,11 +27,11 @@ if(CMAKE_Fortran_COMPILER)
 endif()
 
 # Now we're ready to Find Lapack
-set(USEMKL 0)
 if(atlas)
+  set(USEMKL 0)
   find_package(LAPACK COMPONENTS Atlas REQUIRED)
   set(atlas 1)
-elseif(DEFINED ENV{MKLROOT})
+elseif(USEMKL OR DEFINED ENV{MKLROOT})
   set(USEMKL 1)
   if(lapack95)
     find_package(LAPACK COMPONENTS IntelPar LAPACK95 REQUIRED)
@@ -39,6 +39,7 @@ elseif(DEFINED ENV{MKLROOT})
     find_package(LAPACK COMPONENTS IntelPar REQUIRED)
   endif()
 else()
+  set(USEMKL 0)
   find_package(LAPACK COMPONENTS LAPACKE REQUIRED)  # netlib -- apt install liblapacke-dev
 endif()
 
