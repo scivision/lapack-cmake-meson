@@ -32,10 +32,12 @@ Parameters
 
 COMPONENTS default to Netlib LAPACK / LapackE, otherwise:
 
-``IntelPar``
-  Intel MKL with Intel OpenMP for ICC, GCC and PGCC
-``IntelSeq``
-  Intel MKL without threading for ICC, GCC, and PGCC
+``MKL``
+  Intel MKL for MSVC, ICL, ICC, GCC and PGCC -- sequential by default, or add TBB or MPI as well
+``OpenMP``
+  Intel MPI with OpenMP threading addition to MKL
+``TBB``
+  Intel MPI + TBB for MKL
 ``MKL64``
   MKL only: 64-bit integers  (default is 32-bit integers)
 
@@ -199,17 +201,21 @@ function(find_mkl_libs)
 # https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
 
 set(_mkl_libs ${ARGV})
-if(NOT WIN32 AND CMAKE_Fortran_COMPILER_ID STREQUAL GNU AND Fortran IN_LIST project_languages)
+if(CMAKE_Fortran_COMPILER_ID STREQUAL GNU)
   list(INSERT _mkl_libs 0 mkl_gf_${_mkl_bitflag}lp64)
+else()
+  list(INSERT _mkl_libs 0 mkl_intel_${_mkl_bitflag}lp64)
 endif()
 
 foreach(s ${_mkl_libs})
   find_library(LAPACK_${s}_LIBRARY
            NAMES ${s}
-           PATHS ENV MKLROOT
+           PATHS ENV MKLROOT ENV TBBROOT
            PATH_SUFFIXES
-             lib lib/intel64 lib/intel64_win
-             ../compiler/lib ../compiler/lib/intel64 ../compiler/lib/intel64_win
+             lib/intel64
+             lib/intel64/gcc4.7 ../tbb/lib/intel64/gcc4.7
+             lib/intel64/vc_mt ../tbb/lib/intel64/vc_mt
+             ../compiler/lib/intel64
            HINTS ${MKL_LIBRARY_DIRS}
            NO_DEFAULT_PATH)
 
@@ -223,10 +229,6 @@ endforeach()
 
 if(NOT BUILD_SHARED_LIBS AND (UNIX AND NOT APPLE))
   set(LAPACK_LIB -Wl,--start-group ${LAPACK_LIB} -Wl,--end-group)
-endif()
-
-if(NOT WIN32)
-  list(APPEND LAPACK_LIB ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS} m)
 endif()
 
 set(LAPACK_LIBRARY ${LAPACK_LIB} PARENT_SCOPE)
@@ -244,11 +246,9 @@ cmake_policy(VERSION 3.3)
 
 unset(LAPACK_LIBRARY)
 
-if(NOT (Netlib IN_LIST LAPACK_FIND_COMPONENTS OR Atlas IN_LIST LAPACK_FIND_COMPONENTS
-        OR IntelPar IN_LIST LAPACK_FIND_COMPONENTS OR IntelSeq IN_LIST LAPACK_FIND_COMPONENTS))
+if(NOT (Netlib IN_LIST LAPACK_FIND_COMPONENTS OR Atlas IN_LIST LAPACK_FIND_COMPONENTS OR MKL IN_LIST LAPACK_FIND_COMPONENTS))
   if(NOT DEFINED USEMKL AND DEFINED ENV{MKLROOT})
-    set(USEMKL 1)
-    list(APPEND LAPACK_FIND_COMPONENTS IntelPar)
+    list(APPEND LAPACK_FIND_COMPONENTS MKL)
   else()
     list(APPEND LAPACK_FIND_COMPONENTS Netlib)
   endif()
@@ -262,9 +262,9 @@ find_package(PkgConfig)
 
 # ==== generic MKL variables ====
 
-if(IntelPar IN_LIST LAPACK_FIND_COMPONENTS OR IntelSeq IN_LIST LAPACK_FIND_COMPONENTS)
+if(MKL IN_LIST LAPACK_FIND_COMPONENTS)
   if(NOT WIN32)
-    find_package(Threads)  # not required--for example Flang
+    find_package(Threads)
   endif()
 
   if(BUILD_SHARED_LIBS)
@@ -278,55 +278,59 @@ if(IntelPar IN_LIST LAPACK_FIND_COMPONENTS OR IntelSeq IN_LIST LAPACK_FIND_COMPO
   else()
     set(_mkl_bitflag)
   endif()
-endif()
-
-#=== switchyard
-
-if(IntelPar IN_LIST LAPACK_FIND_COMPONENTS)
-  pkg_check_modules(MKL mkl-${_mkltype}-${_mkl_bitflag}lp64-iomp)
-
-  if(WIN32)
-    set(_mp libiomp5md)  # "lib" is indeed necessary, verified by multiple people on CMake 3.14.0
-  else()
-    set(_mp iomp5)
-  endif()
 
   unset(_mkl_libs)
   if(LAPACK95 IN_LIST LAPACK_FIND_COMPONENTS)
     list(APPEND _mkl_libs mkl_blas95_${_mkl_bitflag}lp64 mkl_lapack95_${_mkl_bitflag}lp64)
   endif()
-  list(APPEND _mkl_libs mkl_intel_${_mkl_bitflag}lp64 mkl_intel_thread mkl_core ${_mp})
+
+  unset(_tbb)
+  if(OpenMP IN_LIST LAPACK_FIND_COMPONENTS)
+    pkg_check_modules(MKL mkl-${_mkltype}-${_mkl_bitflag}lp64-iomp)
+
+    set(_mp iomp5)
+    if(WIN32)
+      set(_mp libiomp5md)  # "lib" is indeed necessary, even on CMake 3.14.0
+    endif()
+    list(APPEND _mkl_libs mkl_intel_thread mkl_core ${_mp})
+  elseif(TBB IN_LIST LAPACK_FIND_COMPONENTS)
+    list(APPEND _mkl_libs mkl_tbb_thread mkl_core)
+    set(_tbb tbb stdc++)
+    if(WIN32)
+      list(APPEND _mkl_libs tbb.lib)
+    endif()
+  else()
+    pkg_check_modules(MKL mkl-${_mkltype}-${_mkl_bitflag}lp64-seq)
+    list(APPEND _mkl_libs mkl_sequential mkl_core)
+  endif()
 
   find_mkl_libs(${_mkl_libs})
 
   if(LAPACK_LIBRARY)
-    set(LAPACK_IntelPar_FOUND true)
+
+    if(NOT WIN32)
+      list(APPEND LAPACK_LIBRARY ${_tbb} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS} m)
+    endif()
+
+    set(LAPACK_MKL_FOUND true)
+
     if(MKL64 IN_LIST LAPACK_FIND_COMPONENTS)
       set(LAPACK_MKL64_FOUND true)
     endif()
+
     if(LAPACK95 IN_LIST LAPACK_FIND_COMPONENTS)
       set(LAPACK_LAPACK95_FOUND true)
     endif()
-  endif()
-elseif(IntelSeq IN_LIST LAPACK_FIND_COMPONENTS)
-  pkg_check_modules(MKL mkl-${_mkltype}-${_mkl_bitflag}lp64-seq)
 
-  unset(_mkl_libs)
-  if(LAPACK95 IN_LIST LAPACK_FIND_COMPONENTS)
-    list(APPEND _mkl_libs mkl_blas95_${_mkl_bitflag}lp64 mkl_lapack95_${_mkl_bitflag}lp64)
-  endif()
-  list(APPEND _mkl_libs mkl_intel_${_mkl_bitflag}lp64 mkl_sequential mkl_core)
-  mkl_libs(${_mkl_libs})
-
-  if(LAPACK_LIBRARY)
-    set(LAPACK_IntelSeq_FOUND true)
-    if(MKL64 IN_LIST LAPACK_FIND_COMPONENTS)
-      set(LAPACK_MKL64_FOUND true)
+    if(OpenMP IN_LIST LAPACK_FIND_COMPONENTS)
+      set(LAPACK_OpenMP_FOUND true)
     endif()
-    if(LAPACK95 IN_LIST LAPACK_FIND_COMPONENTS)
-      set(LAPACK_LAPACK95_FOUND true)
+
+    if(TBB IN_LIST LAPACK_FIND_COMPONENTS)
+      set(LAPACK_TBB_FOUND true)
     endif()
   endif()
+
 elseif(Atlas IN_LIST LAPACK_FIND_COMPONENTS)
 
   atlas_libs()

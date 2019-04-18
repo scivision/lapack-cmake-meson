@@ -186,7 +186,12 @@ def test_result(ret: subprocess.CompletedProcess):
 def clang_params(impl: str) -> Tuple[Dict[str, str], List[str]]:
     compilers = {'CC': 'clang', 'CXX': 'clang++', 'FC': 'flang'}
 
-    args = ['-Datlas=1'] if impl == 'atlas' else []
+    if impl == 'atlas':
+        args = ['-Datlas=1']
+    elif impl == 'mkl':
+        args = ['-DUSEMKL=1']
+    else:
+        args = []
 
     return compilers, args
 
@@ -194,7 +199,12 @@ def clang_params(impl: str) -> Tuple[Dict[str, str], List[str]]:
 def gnu_params(impl: str) -> Tuple[Dict[str, str], List[str]]:
     compilers = {'FC': 'gfortran', 'CC': 'gcc', 'CXX': 'g++'}
 
-    args = ['-Datlas=1'] if impl == 'atlas' else []
+    if impl == 'atlas':
+        args = ['-Datlas=1']
+    elif impl == 'mkl':
+        args = ['-DUSEMKL=1']
+    else:
+        args = []
 
     return compilers, args
 
@@ -237,7 +247,12 @@ def pgi_params(impl: str) -> Tuple[Dict[str, str], List[str]]:
         # pgc++ is not on Windows at this time
         compilers['CXX'] = 'pgc++'
 
-    args = ['-Datlas=1'] if impl == 'atlas' else []
+    if impl == 'atlas':
+        args = ['-Datlas=1']
+    elif impl == 'mkl':
+        args = ['-DUSEMKL=1']
+    else:
+        args = []
 
     return compilers, args
 
