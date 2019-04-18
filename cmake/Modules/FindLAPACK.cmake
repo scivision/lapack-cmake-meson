@@ -301,7 +301,7 @@ if(NOT (OpenBLAS IN_LIST LAPACK_FIND_COMPONENTS
   OR Netlib IN_LIST LAPACK_FIND_COMPONENTS
   OR Atlas IN_LIST LAPACK_FIND_COMPONENTS
   OR MKL IN_LIST LAPACK_FIND_COMPONENTS))
-  if(NOT DEFINED USEMKL AND DEFINED ENV{MKLROOT})
+  if(DEFINED ENV{MKLROOT})
     list(APPEND LAPACK_FIND_COMPONENTS MKL)
   else()
     list(APPEND LAPACK_FIND_COMPONENTS Netlib)
@@ -423,7 +423,7 @@ endif()
 if(_lapack_ok)
   if(MSVC OR CMAKE_C_COMPILER OR LAPACKE IN_LIST LAPACK_FIND_COMPONENTS)
     include(CheckSymbolExists)
-    if(USEMKL)
+    if(MKL IN_LIST LAPACK_FIND_COMPONENTS)
       check_symbol_exists(LAPACKE_cheev mkl_lapacke.h _lapack_ok)
     else()
       check_symbol_exists(LAPACKE_cheev lapacke.h _lapack_ok)
