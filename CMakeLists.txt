@@ -45,13 +45,22 @@ elseif(USEOpenBLAS)
   find_package(LAPACK COMPONENTS OpenBLAS REQUIRED)
 else()
   set(USEMKL 0)
-  find_package(LAPACK COMPONENTS Netlib LAPACKE REQUIRED)  # netlib -- apt install liblapacke-dev
+  find_package(LAPACK COMPONENTS Netlib LAPACKE)  # netlib -- apt install liblapacke-dev
 endif()
 
-# here are some exmaple program using Lapack
-add_subdirectory(c_src)
+# Last ditch fallback
+if(NOT LAPACK_FOUND)
+  find_package(LAPACK)
+endif()
 
-add_subdirectory(fortran_src)
+# here are some exmaple programs using Lapack
+if(CMAKE_C_COMPILER AND (LAPACK_MKL_FOUND OR LAPACK_OpenBLAS_FOUND OR LAPACK_Atlas_FOUND OR LAPACK_LAPACKE_FOUND))
+  add_subdirectory(c_src)
+endif()
+
+if(CMAKE_Fortran_COMPILER AND LAPACK_FOUND)
+  add_subdirectory(fortran_src)
+endif()
 
 # install (just for demonstrating concept)
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
