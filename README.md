@@ -24,12 +24,15 @@ Compiler | Lapack
 gcc + gfortran | Netlib Lapack
 gcc + gfortran | Intel MKL
 gcc + gfortran | Atlas
+gcc + gfortran | OpenBLAS
 Clang + gfortran  | Netlib Lapack
 Clang + gfortran  | Intel MKL
 Clang + gfortran  | Atlas
+Clang + gfortran  | OpenBLAS
 Clang + Flang | Netlib Lapack
 Clang + Flang | Intel MKL
 Clang + Flang | Atlas
+Clang + Flang  | OpenBLAS
 
 
 ## prereq

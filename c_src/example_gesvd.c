@@ -43,6 +43,8 @@ from http://www.netlib.org/lapack/explore-html/d5/df8/example___d_g_e_s_v__colma
 #elif USEATLAS == 1
 #include "cblas.h"
 #include "clapack.h"
+#elif USEOpenBLAS == 1
+#include "cblas.h"
 #else
 #include "lapacke.h"
 #endif
@@ -95,10 +97,12 @@ int main(int argc, char **argv) {
      //printf( "\n" );
 
      /* Executable statements */
-     printf( "dgesv (row-major, high-level) Example Program Results\n" );
+     /* printf( "dgesv (row-major, high-level) Example Program Results\n" ); */
      /* Solve the equations A*X = B */
 #if USEATLAS==1
      info = clapack_dgesv( 102, n, nrhs, A, lda, ipiv, b, ldb );
+#elif USEOpenBLAS == 1
+     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,n,n,n,1, A, lda, b, ldb, 0, A, lda);
 #else
      info = LAPACKE_dgesv( LAPACK_COL_MAJOR, n, nrhs, A, lda, ipiv, b, ldb );
 #endif

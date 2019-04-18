@@ -5,6 +5,7 @@ enable_testing()
 option(BUILD_SHARED_LIBS "static or shared libs")
 option(atlas "Atlas Lapack implementation")
 option(lapack95 "use Lapack95")
+option(USEOpenBLAS "OpenBLAS")
 
 if(NOT CMAKE_BUILD_TYPE)
   # must have FORCE or it won't take effect
@@ -38,9 +39,13 @@ elseif(USEMKL OR DEFINED ENV{MKLROOT})
   else()
     find_package(LAPACK COMPONENTS MKL REQUIRED)
   endif()
+elseif(USEOpenBLAS)
+  set(USEMKL 0)
+  set(USEOpenBLAS 1)
+  find_package(LAPACK COMPONENTS OpenBLAS REQUIRED)
 else()
   set(USEMKL 0)
-  find_package(LAPACK COMPONENTS LAPACKE REQUIRED)  # netlib -- apt install liblapacke-dev
+  find_package(LAPACK COMPONENTS Netlib LAPACKE REQUIRED)  # netlib -- apt install liblapacke-dev
 endif()
 
 # here are some exmaple program using Lapack

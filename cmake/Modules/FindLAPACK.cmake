@@ -45,6 +45,8 @@ COMPONENTS default to Netlib LAPACK / LapackE, otherwise:
   Netlib LapackE for C / C++
 ``Netlib``
   Netlib Lapack for Fortran
+``OpenBLAS``
+  OpenBLAS Lapack for Fortran
 
 ``LAPACK95``
   get Lapack95 interfaces for MKL or Netlib (must also specify one of IntelPar, IntelSeq, Netlib)
@@ -77,31 +79,31 @@ References
 
 function(atlas_libs)
 
-if(NOT WIN32)
-  find_package(Threads)  # not required--for example Flang
-endif()
-
 find_library(ATLAS_LIB
-  NAMES atlas)
+  NAMES atlas
+  PATH_SUFFIXES atlas)
 
 pkg_check_modules(LAPACK_ATLAS lapack-atlas)
 
 find_library(LAPACK_ATLAS
   NAMES ptlapack lapack_atlas lapack
+  PATH_SUFFIXES atlas
   HINTS ${LAPACK_ATLAS_LIBRARY_DIRS})
 
 pkg_check_modules(LAPACK_BLAS blas-atlas)
 
 find_library(BLAS_LIBRARY
   NAMES ptf77blas f77blas blas
+  PATH_SUFFIXES atlas
   HINTS ${LAPACK_BLAS_LIBRARY_DIRS})
 # === C ===
 find_library(BLAS_C_ATLAS
   NAMES ptcblas cblas
+  PATH_SUFFIXES atlas
   HINTS ${LAPACK_BLAS_LIBRARY_DIRS})
 
 find_path(LAPACK_INCLUDE_DIR
-  NAMES cblas.h clapack.h
+  NAMES cblas-atlas.h cblas.h clapack.h
   HINTS ${LAPACK_BLAS_INCLUDE_DIRS})
 
 #===========
@@ -109,6 +111,7 @@ if(LAPACK_ATLAS AND BLAS_C_ATLAS AND BLAS_LIBRARY AND ATLAS_LIB)
   set(LAPACK_Atlas_FOUND true PARENT_SCOPE)
   set(LAPACK_LIBRARY ${LAPACK_ATLAS} ${BLAS_C_ATLAS} ${BLAS_LIBRARY} ${ATLAS_LIB})
   if(NOT WIN32)
+    find_package(Threads)  # not required--for example Flang
     list(APPEND LAPACK_LIBRARY ${CMAKE_THREAD_LIBS_INIT})
   endif()
 endif()
@@ -143,7 +146,8 @@ endif()
 pkg_check_modules(LAPACK lapack-netlib)
 find_library(LAPACK_LIB
   NAMES lapack
-  HINTS ${LAPACK_LIBRARY_DIRS})
+  HINTS ${LAPACK_LIBRARY_DIRS}
+  PATH_SUFFIXES lapack)
 if(LAPACK_LIB)
   list(APPEND LAPACK_LIBRARY ${LAPACK_LIB})
 else()
@@ -177,7 +181,8 @@ endif()
 pkg_check_modules(BLAS blas-netlib)
 find_library(BLAS_LIBRARY
   NAMES refblas blas
-  HINTS ${BLAS_LIBRARY_DIRS})
+  HINTS ${BLAS_LIBRARY_DIRS}
+  PATH_SUFFIXES blas)
 
 if(BLAS_LIBRARY)
   list(APPEND LAPACK_LIBRARY ${LAPACK_LIB} ${BLAS_LIBRARY})
@@ -194,6 +199,46 @@ set(LAPACK_LIBRARY ${LAPACK_LIBRARY} PARENT_SCOPE)
 set(LAPACK_INCLUDE_DIR ${LAPACK_INCLUDE_DIR} PARENT_SCOPE)
 
 endfunction(netlib_libs)
+
+#===============================
+function(openblas_libs)
+
+pkg_check_modules(LAPACK lapack-openblas)
+find_library(LAPACK_LIBRARY
+  NAMES lapack
+  HINTS ${LAPACK_LIBRARY_DIRS}
+  PATH_SUFFIXES openblas)
+
+
+pkg_check_modules(BLAS blas-openblas)
+find_library(BLAS_LIBRARY
+  NAMES openblas blas
+  HINTS ${BLAS_LIBRARY_DIRS}
+  PATH_SUFFIXES openblas)
+
+find_path(LAPACK_INCLUDE_DIR
+    NAMES cblas-openblas.h cblas.h f77blas.h openblas_config.h
+    HINTS ${LAPACK_INCLUDE_DIRS})
+
+if(LAPACK_LIBRARY AND BLAS_LIBRARY)
+  list(APPEND LAPACK_LIBRARY ${BLAS_LIBRARY})
+  set(LAPACK_OpenBLAS_FOUND true PARENT_SCOPE)
+else()
+  message(WARNING "Trouble finding OpenBLAS:
+      include: ${LAPACK_INCLUDE_DIR}
+      libs: ${LAPACK_LIBRARY} ${BLAS_LIBRARY}")
+  return()
+endif()
+
+if(NOT WIN32)
+ find_package(Threads)  # not required--for example Flang
+ list(APPEND LAPACK_LIBRARY ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
+set(LAPACK_LIBRARY ${LAPACK_LIBRARY} PARENT_SCOPE)
+set(LAPACK_INCLUDE_DIR ${LAPACK_INCLUDE_DIR} PARENT_SCOPE)
+
+endfunction(openblas_libs)
 
 #===============================
 
@@ -246,7 +291,10 @@ cmake_policy(VERSION 3.3)
 
 unset(LAPACK_LIBRARY)
 
-if(NOT (Netlib IN_LIST LAPACK_FIND_COMPONENTS OR Atlas IN_LIST LAPACK_FIND_COMPONENTS OR MKL IN_LIST LAPACK_FIND_COMPONENTS))
+if(NOT (OpenBLAS IN_LIST LAPACK_FIND_COMPONENTS
+  OR Netlib IN_LIST LAPACK_FIND_COMPONENTS
+  OR Atlas IN_LIST LAPACK_FIND_COMPONENTS
+  OR MKL IN_LIST LAPACK_FIND_COMPONENTS))
   if(NOT DEFINED USEMKL AND DEFINED ENV{MKLROOT})
     list(APPEND LAPACK_FIND_COMPONENTS MKL)
   else()
@@ -339,6 +387,10 @@ elseif(Netlib IN_LIST LAPACK_FIND_COMPONENTS)
 
   netlib_libs()
 
+elseif(OpenBLAS IN_LIST LAPACK_FIND_COMPONENTS)
+
+  openblas_libs()
+
 endif()
 
 # verify LAPACK
@@ -348,15 +400,22 @@ set(CMAKE_REQUIRED_LIBRARIES ${LAPACK_LIBRARY})
 set(_lapack_ok true)
 if(CMAKE_Fortran_COMPILER AND LAPACK_LIBRARY)
   include(CheckFortranFunctionExists)
-  check_fortran_function_exists(sgemm BLAS_OK)
-  check_fortran_function_exists(sgesv LAPACK_OK)
+  if(OpenBLAS IN_LIST LAPACK_FIND_COMPONENTS)
+    set(_blas_func sgemm)
+    set(_lapack_func sgemv)
+  else()
+    set(_blas_func sgemm)
+    set(_lapack_func sgesv)
+  endif()
+  check_fortran_function_exists(${_blas_func} BLAS_OK)
+  check_fortran_function_exists(${_lapack_func} LAPACK_OK)
   if(NOT (BLAS_OK AND LAPACK_OK))
     set(_lapack_ok false)
   endif()
 endif()
 
 if(_lapack_ok)
-  if(MSVC OR (CMAKE_C_COMPILER AND USEMKL) OR LAPACKE IN_LIST LAPACK_FIND_COMPONENTS)
+  if(MSVC OR CMAKE_C_COMPILER OR LAPACKE IN_LIST LAPACK_FIND_COMPONENTS)
     include(CheckSymbolExists)
     if(USEMKL)
       check_symbol_exists(LAPACKE_cheev mkl_lapacke.h _lapack_ok)

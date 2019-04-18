@@ -190,6 +190,8 @@ def clang_params(impl: str) -> Tuple[Dict[str, str], List[str]]:
         args = ['-Datlas=1']
     elif impl == 'mkl':
         args = ['-DUSEMKL=1']
+    elif impl == 'openblas':
+        args = ['-DUSEOpenBLAS=1']
     else:
         args = []
 
@@ -203,6 +205,8 @@ def gnu_params(impl: str) -> Tuple[Dict[str, str], List[str]]:
         args = ['-Datlas=1']
     elif impl == 'mkl':
         args = ['-DUSEMKL=1']
+    elif impl == 'openblas':
+        args = ['-DUSEOpenBLAS=1']
     else:
         args = []
 
@@ -251,6 +255,8 @@ def pgi_params(impl: str) -> Tuple[Dict[str, str], List[str]]:
         args = ['-Datlas=1']
     elif impl == 'mkl':
         args = ['-DUSEMKL=1']
+    elif impl == 'openblas':
+        args = ['-DUSEOpenBLAS=1']
     else:
         args = []
 
