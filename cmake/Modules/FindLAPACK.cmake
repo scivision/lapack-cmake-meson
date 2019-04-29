@@ -263,7 +263,7 @@ foreach(s ${_mkl_libs})
            NAMES ${s}
            PATHS ENV MKLROOT ENV TBBROOT
            PATH_SUFFIXES
-             lib/intel64
+             lib/intel64 lib/intel64_win
              lib/intel64/gcc4.7 ../tbb/lib/intel64/gcc4.7
              lib/intel64/vc_mt ../tbb/lib/intel64/vc_mt
              ../compiler/lib/intel64
