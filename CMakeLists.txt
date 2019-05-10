@@ -1,24 +1,20 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.7)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Debug or Release" FORCE)
+endif()
 project(lapack_demo C)
 enable_testing()
 
-option(BUILD_SHARED_LIBS "static or shared libs")
 option(atlas "Atlas Lapack implementation")
 option(lapack95 "use Lapack95")
 option(USEOpenBLAS "OpenBLAS")
 
-if(NOT CMAKE_BUILD_TYPE)
-  # must have FORCE or it won't take effect
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Debug or Release" FORCE)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
+  cmake_policy(SET CMP0074 NEW)
 endif()
 
 # this ensures we use our clean FindLapack, instead of old factory FindLapack
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
-
-# this forces static libs, as an example. Not necessary in general.
-if(NOT BUILD_SHARED_LIBS)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES .a .lib)
-endif()
 
 # if working Fortran compiler present, enable Fortran before searching for libraries
 include(CheckLanguage)

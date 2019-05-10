@@ -145,12 +145,15 @@ endif()
 
 pkg_check_modules(LAPACK lapack-netlib)
 if(NOT LAPACK_FOUND)
-  pkg_check_modules(LAPACK lapack)  # Netlib on Cygwin and others
+  pkg_check_modules(LAPACK lapack)  # Netlib on Cygwin, Homebrew and others
 endif()
+
 find_library(LAPACK_LIB
   NAMES lapack
+  PATHS /usr/local/opt
   HINTS ${LAPACK_LIBRARY_DIRS}
-  PATH_SUFFIXES lapack)
+  PATH_SUFFIXES lapack lapack/lib)
+
 if(LAPACK_LIB)
   list(APPEND LAPACK_LIBRARY ${LAPACK_LIB})
 else()
@@ -161,11 +164,16 @@ if(LAPACKE IN_LIST LAPACK_FIND_COMPONENTS)
   pkg_check_modules(LAPACKE lapacke)
   find_library(LAPACKE_LIBRARY
     NAMES lapacke
-    HINTS ${LAPACKE_LIBRARY_DIRS})
+    PATHS /usr/local/opt
+    HINTS ${LAPACKE_LIBRARY_DIRS}
+    PATH_SUFFIXES lapack lapack/lib)
 
+  # lapack/include for Home-brew
   find_path(LAPACKE_INCLUDE_DIR
     NAMES lapacke.h
-    HINTS ${LAPACKE_INCLUDE_DIRS})
+    PATHS /usr/local/opt
+    HINTS ${LAPACKE_INCLUDE_DIRS}
+    PATH_SUFFIXES lapack lapack/include)
 
   if(LAPACKE_LIBRARY AND LAPACKE_INCLUDE_DIR)
     set(LAPACK_LAPACKE_FOUND true PARENT_SCOPE)
@@ -252,18 +260,21 @@ function(find_mkl_libs)
 # https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
 
 set(_mkl_libs ${ARGV})
-if(CMAKE_Fortran_COMPILER_ID STREQUAL GNU)
+if((UNIX AND NOT APPLE) AND CMAKE_Fortran_COMPILER_ID STREQUAL GNU)
   list(INSERT _mkl_libs 0 mkl_gf_${_mkl_bitflag}lp64)
 else()
   list(INSERT _mkl_libs 0 mkl_intel_${_mkl_bitflag}lp64)
 endif()
+
+# Note: Don't remove items from PATH_SUFFIXES unless you're extensively testing,
+# each path is there for a specific reason!
 
 foreach(s ${_mkl_libs})
   find_library(LAPACK_${s}_LIBRARY
            NAMES ${s}
            PATHS ENV MKLROOT ENV TBBROOT
            PATH_SUFFIXES
-             lib/intel64 lib/intel64_win
+             lib lib/intel64 lib/intel64_win
              lib/intel64/gcc4.7 ../tbb/lib/intel64/gcc4.7
              lib/intel64/vc_mt ../tbb/lib/intel64/vc_mt
              ../compiler/lib/intel64
