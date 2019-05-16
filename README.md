@@ -14,7 +14,7 @@ Windows:
 Compiler | Lapack
 ---------|-------
 MSVC 15 2017 | Intel MKL
-PGI 18 | Intel MKL
+PGI | Intel MKL
 
 
 Linux:
@@ -38,7 +38,7 @@ Clang + Flang  | OpenBLAS
 ## prereq
 
 * Linux: `apt install liblapacke-dev`
-* Mac: `brew install lapack` doesn't currently include LapackE, so you'd need to compile [Lapack from source](https://github.com/Reference-LAPACK/lapack)
+* Mac: `brew install lapack`
 * Windows: compile [Lapack from source](https://github.com/Reference-LAPACK/lapack), or use [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 
