@@ -17,7 +17,7 @@ if (any(errmag > 1e-3)) then
   print *,'estimated solution: ',B
   print *,'true input: ',truthX
   write(stderr,*) 'large error on singular values', errmag
-  stop 1
+  error stop
 endif
 
 end procedure svd

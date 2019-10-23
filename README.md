@@ -1,11 +1,14 @@
 [![Build Status](https://travis-ci.com/scivision/lapack-cmake.svg?branch=master)](https://travis-ci.com/scivision/lapack-cmake)
 
-# Lapack with cmake
+# Lapack with Meson or CMake
 
 A clean, modern
 [FindLAPACK.cmake](./cmake/Modules/FindLAPACK.cmake)
 with verified compatibility across a wide range of compilers, operating systems and Lapack vendors.
-Uses PkgConfig in CMake to make finding Lapack / LapackE more robust.
+Optionally, uses PkgConfig in CMake to make finding Lapack / LapackE more robust.
+
+
+## CMake
 
 Here is a brief listing of known working configurations:
 
@@ -34,15 +37,7 @@ Clang + Flang | Intel MKL
 Clang + Flang | Atlas
 Clang + Flang  | OpenBLAS
 
-
-## prereq
-
-* Linux: `apt install liblapacke-dev`
-* Mac: `brew install lapack`
-* Windows: compile [Lapack from source](https://github.com/Reference-LAPACK/lapack), or use [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
-
-
-## Example
+### Example
 
 This example is for SVD computation using LapackE from C.
 
@@ -64,8 +59,33 @@ If you have a Fortran compiler, a Fortran Lapack example will also be built and 
 For MSVC compilers, only the C example is built, and requires Intel MKL:
 
 ```sh
-python build.py msvc
+cmake -G "Visual Studio 16 2019" -B build
+
+cmake --build build
 ```
+
+## Meson
+
+Lapack with Meson works with similar compiler configurations as CMake.
+
+```sh
+meson build
+
+meson test -C build
+```
+
+to use MKL with Meson, do like
+
+```sh
+meson build -DMKL_ROOT=$MKLROOT  # linux
+```
+
+
+## prereq
+
+* Linux: `apt install liblapacke-dev`
+* Mac: `brew install lapack`
+* Windows: compile [Lapack from source](https://github.com/Reference-LAPACK/lapack), or use [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 
 ### Intel MKL

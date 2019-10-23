@@ -1,3 +1,1 @@
-option('atlas', description : 'Atlas Lapack implementation', type: 'integer', value: 0)
-option('usemkl', description: 'Intel MKL', type: 'integer', value: 0)
-option('lapack95', description : 'use Lapack95', type: 'integer', value: 0)
+option('MKL_ROOT', type: 'string', description: '-DMKL_ROOT=$MKLROOT')
