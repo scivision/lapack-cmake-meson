@@ -29,7 +29,7 @@ matrix:
 install:
 - cd build
 
-- cmake -DUSEFortran=true ..
+- cmake ..
 
 - cmake --build .
 

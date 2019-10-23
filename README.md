@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/scivision/lapack-cmake.svg?branch=master)](https://travis-ci.com/scivision/lapack-cmake)
+[![Actions Status](https://github.com/scivision/lapack-cmake-meson/workflows/ci/badge.svg)](https://github.com/scivision/lapack-cmake-meson/workflows/ci/badge/actions)
 
 # Lapack with Meson or CMake
 
@@ -123,14 +123,5 @@ was used, run a program with `MKL_VERBOSE=1` like:
 * On Windows, MinGW is not supported with MKL at least through MKL 2019--you will get all kinds of errors.
 * Windows CMake systems that don't want to use MSVC must in general include `cmake -G "MinGW Makefiles"` along with their other options.
   This is true for anything CMake is used for on Windows where Visual Studio is not wanted.
-
-### MKL + PGI on Windows
-
-Assuming you have already set `CC=pgcc` `CXX=pgc++` and `FC=pgfortran`, this will work with MKL for C and Fortran using the
-[free PGI Community Edition compilers](https://www.scivision.dev/install-pgi-free-compiler/)
-
-```sh
-python build.py pgi
-```
 
 

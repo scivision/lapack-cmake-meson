@@ -6,7 +6,7 @@ fc=$1
 
 bindir=build
 
-for cc in gcc clang pgcc icc
+for cc in gcc clang pgcc icc icl
 do
 
 [[ $(which $cc) ]] || continue
