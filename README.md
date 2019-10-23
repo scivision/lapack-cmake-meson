@@ -1,4 +1,6 @@
-[![Actions Status](https://github.com/scivision/lapack-cmake-meson/workflows/ci/badge.svg)](https://github.com/scivision/lapack-cmake-meson/workflows/ci/badge/actions)
+[![Actions Status](https://github.com/scivision/lapack-cmake-meson/workflows/ci_cmake/badge.svg)](https://github.com/scivision/lapack-cmake-meson/workflows/ci_cmake/actions)
+[![Actions Status](https://github.com/scivision/lapack-cmake-meson/workflows/ci_meson/badge.svg)](https://github.com/scivision/lapack-cmake-meson/workflows/ci_meson/actions)
+
 
 # Lapack with Meson or CMake
 

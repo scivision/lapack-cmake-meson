@@ -66,9 +66,9 @@ else
   endif
 endif
 
-if not lapack.found()
+if not lapack_lib.found()
   lapack_proj = subproject('lapack')
-  lapack = lapack_proj.get_variable('lapack')
+  lapack_lib = lapack_proj.get_variable('lapack')
 endif
 
 subdir('fortran_src')

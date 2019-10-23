@@ -1,0 +1,23 @@
+name: ci_cmake
+
+on:
+  push:
+    paths-ignore:
+      - "**/*.md"
+  pull_request:
+    paths-ignore:
+      - "**/*.md"
+
+jobs:
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - run: sudo apt install -yq --no-install-recommends gfortran liblapack-dev
+    - run: mkdir build
+    - run: cmake ..
+      working-directory: build
+    - run: cmake --build build --parallel
+    - run: ctest -V
+      working-directory: build
