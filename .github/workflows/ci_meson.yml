@@ -1,12 +1,6 @@
 name: ci_meson
 
-on:
-  push:
-    paths-ignore:
-      - "**/*.md"
-  pull_request:
-    paths-ignore:
-      - "**/*.md"
+on: [push, pull_request]
 
 jobs:
 
@@ -17,11 +11,10 @@ jobs:
     - uses: actions/setup-python@v1
       with:
         python-version: '3.x'
-    - run: |
-        git clone https://github.com/mesonbuild/meson
-        pip install -e meson
-    - run: sudo apt install -yq --no-install-recommends ninja-build gfortran liblapack-dev liblapacke-dev
+    - run: pip install meson ninja
+    - run: sudo apt install -yq --no-install-recommends gfortran liblapack-dev liblapacke-dev
     - run: meson setup build
+    - run: ninja -C build
     - run: meson test -C build -v
     - uses: actions/upload-artifact@v1
       if: failure()
@@ -36,11 +29,9 @@ jobs:
     - uses: actions/setup-python@v1
       with:
         python-version: '3.x'
-    - run: |
-        git clone https://github.com/mesonbuild/meson
-        pip install -e meson
-    - run: cinst -y ninja
+    - run: pip install meson ninja
     - run: meson setup build
+    - run: ninja -C build
     - run: meson test -C build -v
     - uses: actions/upload-artifact@v1
       if: failure()

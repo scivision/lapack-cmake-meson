@@ -1,12 +1,6 @@
 name: ci_cmake
 
-on:
-  push:
-    paths-ignore:
-      - "**/*.md"
-  pull_request:
-    paths-ignore:
-      - "**/*.md"
+on: [push, pull_request]
 
 jobs:
 
@@ -19,5 +13,4 @@ jobs:
     - run: cmake ..
       working-directory: build
     - run: cmake --build build --parallel
-    - run: ctest -V
-      working-directory: build
+    - run: cmake --build build --target test
