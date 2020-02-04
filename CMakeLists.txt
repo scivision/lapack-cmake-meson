@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.12)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Debug or Release" FORCE)
 endif()
@@ -9,9 +9,7 @@ option(atlas "Atlas Lapack implementation")
 option(lapack95 "use Lapack95")
 option(USEOpenBLAS "OpenBLAS")
 
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
-  cmake_policy(SET CMP0074 NEW)
-endif()
+cmake_policy(SET CMP0074 NEW)
 
 # this ensures we use our clean FindLapack, instead of old factory FindLapack
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
@@ -50,21 +48,10 @@ if(NOT LAPACK_FOUND)
 endif()
 
 # here are some exmaple programs using Lapack
-if(CMAKE_C_COMPILER AND (LAPACK_MKL_FOUND OR LAPACK_OpenBLAS_FOUND OR LAPACK_Atlas_FOUND OR LAPACK_LAPACKE_FOUND))
+if(LAPACK_MKL_FOUND OR LAPACK_OpenBLAS_FOUND OR LAPACK_Atlas_FOUND OR LAPACK_LAPACKE_FOUND)
   add_subdirectory(c_src)
 endif()
 
 if(CMAKE_Fortran_COMPILER AND LAPACK_FOUND)
   add_subdirectory(fortran_src)
-endif()
-
-# install (just for demonstrating concept)
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  if(WIN32)
-    set(HOME $ENV{USERPROFILE})
-  else()
-    set(HOME $ENV{HOME})
-  endif()
-
-  set(CMAKE_INSTALL_PREFIX "${HOME}/lapack_demo" CACHE PATH "..." FORCE)
 endif()

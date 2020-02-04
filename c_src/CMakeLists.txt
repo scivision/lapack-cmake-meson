@@ -1,7 +1,3 @@
-if(NOT CMAKE_C_COMPILER)
-  return()
-endif()
-
 set(need_gf GNU Clang)
 
 if(NOT USEMKL AND CMAKE_C_COMPILER_ID IN_LIST need_gf)
@@ -20,7 +16,3 @@ target_compile_definitions(svd_c PRIVATE USEMKL=${USEMKL} USEATLAS=${atlas} USEO
 add_test(NAME C-SVD COMMAND svd_c)
 set_tests_properties(C-SVD PROPERTIES
   ENVIRONMENT MKL_VERBOSE=1)
-
-# just for demonstrating concept
-install(TARGETS svd_c
-  RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})

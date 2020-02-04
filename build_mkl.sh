@@ -13,7 +13,7 @@ bindir=build
 
 rm -f $bindir/CMakeCache.txt
 
-CC=$cc FC=$fc cmake -B $bindir -S .
+CC=$cc FC=$fc cmake -B $bindir
 
 cmake --build $bindir
 

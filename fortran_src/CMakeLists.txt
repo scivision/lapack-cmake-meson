@@ -19,7 +19,3 @@ target_link_libraries(svd_f PRIVATE ${LAPACK_LIBRARIES} ${LDFLAGS})
 add_test(NAME Fortran-SVD COMMAND svd_f)
 set_tests_properties(Fortran-SVD PROPERTIES
   ENVIRONMENT MKL_VERBOSE=1)
-
-# just for demonstrating concept
-install(TARGETS svd_f
-  RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})

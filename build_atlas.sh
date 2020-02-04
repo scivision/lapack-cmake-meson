@@ -11,7 +11,7 @@ bindir=build
 
 rm -f $bindir/CMakeCache.txt
 
-CC=$cc FC=$fc cmake -Datlas=1 -B $bindir -S .
+CC=$cc FC=$fc cmake -Datlas=1 -B $bindir
 
 cmake --build $bindir
 

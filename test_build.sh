@@ -11,14 +11,10 @@ do
 
 [[ $(which $cc) ]] || continue
 
-rm -r $bindir/CMakeCache.txt
+rm -f $bindir/CMakeCache.txt
 
-CC=$cc cmake -B $bindir -S .
-
-[[ $? == 0 ]] && cmake --build $bindir
-
-[[ $? == 0 ]] && (cd $bindir; ctest)
+CC=$cc cmake -B $bindir && cmake --build $bindir && (cd $bindir; ctest)
 
 done
 
-rm -r $bindir/CMakeCache.txt
+rm -f $bindir/CMakeCache.txt

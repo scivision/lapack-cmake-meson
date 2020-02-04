@@ -8,9 +8,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - run: sudo apt install -yq --no-install-recommends gfortran liblapack-dev
-    - run: mkdir build
-    - run: cmake ..
-      working-directory: build
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+
+    - run: |
+        pip install cmake
+        sudo apt update -yq
+        sudo apt install -yq --no-install-recommends gfortran liblapack-dev
+
+    - run: cmake -B build
+
     - run: cmake --build build --parallel
-    - run: cmake --build build --target test
+
+    - run: ctest -V
+      working-directory: build
