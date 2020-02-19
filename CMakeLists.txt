@@ -9,8 +9,6 @@ option(atlas "Atlas Lapack implementation")
 option(lapack95 "use Lapack95")
 option(USEOpenBLAS "OpenBLAS")
 
-cmake_policy(SET CMP0074 NEW)
-
 # this ensures we use our clean FindLapack, instead of old factory FindLapack
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
