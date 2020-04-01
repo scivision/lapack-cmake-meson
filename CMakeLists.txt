@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Debug or Release" FORCE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Debug or Release")
 endif()
-project(lapack_demo C)
+project(lapack_demo
+LANGUAGES C)
 enable_testing()
 
 option(atlas "Atlas Lapack implementation")
