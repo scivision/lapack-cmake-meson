@@ -13,7 +13,7 @@ do
 
 rm -f $bindir/CMakeCache.txt
 
-CC=$cc cmake -B $bindir && cmake --build $bindir && (cd $bindir; ctest)
+CC=$cc ctest -S setup.cmake -VV
 
 done
 

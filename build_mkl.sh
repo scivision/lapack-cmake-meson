@@ -15,6 +15,4 @@ rm -f $bindir/CMakeCache.txt
 
 CC=$cc FC=$fc cmake -B $bindir
 
-cmake --build $bindir
-
-(cd $bindir; ctest -V)
+ctest -S setup.cmake -VV
