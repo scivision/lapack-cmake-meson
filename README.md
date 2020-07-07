@@ -1,8 +1,7 @@
-[![Actions Status](https://github.com/scivision/lapack-cmake-meson/workflows/ci_cmake/badge.svg)](https://github.com/scivision/lapack-cmake-meson/workflows/ci_cmake/actions)
-[![Actions Status](https://github.com/scivision/lapack-cmake-meson/workflows/ci_meson/badge.svg)](https://github.com/scivision/lapack-cmake-meson/workflows/ci_meson/actions)
-
-
 # Lapack with Meson or CMake
+
+![Actions Status](https://github.com/scivision/lapack-cmake-meson/workflows/ci_cmake/badge.svg)
+![Actions Status](https://github.com/scivision/lapack-cmake-meson/workflows/ci_meson/badge.svg)
 
 A clean, modern
 [FindLAPACK.cmake](./cmake/Modules/FindLAPACK.cmake)
@@ -46,13 +45,7 @@ This example is for SVD computation using LapackE from C.
 For most non-MSVC compilers (e.g. GNU, PGI, Clang, etc.):
 
 ```sh
-cd build
-
-cmake ..
-
-cmake --build .
-
-ctest -V
+ctest -S setup.cmake -VV
 ```
 
 If you have a Fortran compiler, a Fortran Lapack example will also be built and tested.
@@ -125,5 +118,3 @@ was used, run a program with `MKL_VERBOSE=1` like:
 * On Windows, MinGW is not supported with MKL at least through MKL 2019--you will get all kinds of errors.
 * Windows CMake systems that don't want to use MSVC must in general include `cmake -G "MinGW Makefiles"` along with their other options.
   This is true for anything CMake is used for on Windows where Visual Studio is not wanted.
-
-

@@ -8,17 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v1
-      with:
-        python-version: '3.x'
 
     - run: |
         sudo apt update -yq
         sudo apt install -yq --no-install-recommends gfortran liblapack-dev
 
-    - run: cmake -B build
-
-    - run: cmake --build build --parallel
-
-    - run: ctest -V
-      working-directory: build
+    - run: ctest -S setup.cmake -VV
