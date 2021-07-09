@@ -1,6 +1,10 @@
 name: ci_meson
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - "**/meson.build"
+      - ".github/workflows/ci_meson.yml"
 
 jobs:
 
@@ -30,8 +34,7 @@ jobs:
       with:
         python-version: '3.x'
     - run: |
-        pip install meson
-        cinst -y ninja
+        pip install meson ninja
 
     - run: meson setup build
     - run: meson compile -C build
